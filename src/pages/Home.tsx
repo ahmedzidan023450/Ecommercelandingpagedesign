@@ -77,7 +77,7 @@ export default function Home() {
               </a>
               {/* تعديل زرار تواصل معنا هنا */}
               <a 
-                href="https://wa.me/201020611935?text=مرحباً مؤسسة رؤية، أريد الاستفسار عن منتجاتكم" 
+                href="https://wa.me/0000000000000?text=مرحباً مؤسسة رؤية، أريد الاستفسار عن منتجاتكم" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-8 py-4 rounded-lg font-bold text-lg text-center transition-all flex items-center justify-center gap-2"
@@ -157,7 +157,7 @@ export default function Home() {
 
                   {/* تعديل زرار المنتجات هنا */}
                   <a 
-                    href={`https://wa.me/201020611935?text=مرحباً، أرغب بالاستفسار عن تفاصيل وسعر هذا المنتج: ${product.title}`}
+                    href={`https://wa.me/0000000000000?text=مرحباً، أرغب بالاستفسار عن تفاصيل وسعر هذا المنتج: ${product.title}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2 font-bold transition-colors shadow-md shadow-emerald-500/20"
@@ -173,7 +173,7 @@ export default function Home() {
           <div className="mt-16 text-center">
             {/* تعديل اللينك اللي تحت خالص هنا */}
             <a 
-              href="https://wa.me/201020611935?text=مرحباً، أبحث عن تصميم مخصص لغرفة نوم" 
+              href="https://wa.me/00000000000000000?text=مرحباً، أبحث عن تصميم مخصص لغرفة نوم" 
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-blue-950 font-bold hover:text-amber-600 transition-colors text-lg group"

@@ -29,11 +29,11 @@ export default function App() {
             {/* تعديل الرقم فوق */}
             <div className="flex items-center gap-2">
               <Phone size={16} className="text-amber-500" />
-              <span dir="ltr" className="font-semibold">010 2061 1935</span>
+              <span dir="ltr" className="font-semibold">0000000000000</span>
             </div>
             {/* تعديل زرار الواتس اللي في التوب بار */}
             <a 
-              href="https://wa.me/201020611935?text=مرحباً، أريد التواصل معكم بخصوص الأثاث" 
+              href="https://wa.me/00000000000000000?text=مرحباً، أريد التواصل معكم بخصوص الأثاث" 
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 transition-colors px-4 py-1.5 rounded-full font-medium text-xs sm:text-sm"
@@ -163,7 +163,7 @@ export default function App() {
                   {/* تعديل الرقم في الفوتر هنا */}
                   <div className="flex items-center gap-3">
                     <Phone className="text-amber-500 flex-shrink-0" size={20} />
-                    <span dir="ltr" className="text-blue-200 font-medium">010 2061 1935</span>
+                    <span dir="ltr" className="text-blue-200 font-medium">0000000000000</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail className="text-amber-500 flex-shrink-0" size={20} />
