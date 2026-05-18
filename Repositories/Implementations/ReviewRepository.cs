@@ -60,7 +60,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
 
             var avg = await reviews.AverageAsync(r => r.Rating);
 
-            return (avg, count);
+            return ((decimal)avg, count);
         }
 
         // =========================

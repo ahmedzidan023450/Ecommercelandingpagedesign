@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Furniture_E_Commerce.Models;
+   
 
 [Table("Products")]
 public class Product

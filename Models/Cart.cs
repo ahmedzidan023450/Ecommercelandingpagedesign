@@ -17,7 +17,6 @@ public class Cart
 
     public DateTime? UpdatedAt { get; set; }
 
-    // ── Navigation properties ──────────────────────────────────────────────
     [ForeignKey(nameof(UserId))]
     public virtual User User { get; set; } = null!;
 

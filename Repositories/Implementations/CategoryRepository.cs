@@ -1,10 +1,9 @@
 ﻿using Furniture_E_Commerce.Data;
 using Furniture_E_Commerce.Models;
-using Furniture_E_Commerce.Repositories.Implementations;
 using Furniture_E_Commerce.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Furniture_E_Commerce.Repositories.Classes
+namespace Furniture_E_Commerce.Repositories.Implementations
 {
     public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
