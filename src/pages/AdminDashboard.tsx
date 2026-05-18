@@ -3,27 +3,27 @@ import { LayoutDashboard, Package, PlusCircle, Trash2, Edit, Save, X, TrendingUp
 
 export default function AdminDashboard() {
   const [view, setView] = useState<'list' | 'add' | 'settings'>('list');
-  const [imageInputType, setImageInputType] = useState<'link' | 'file'>('link');
+  
+  // حالات تحديد نوع الإدخال (رابط أو ملف) لكل فورم بشكل مستقل
+  const [productImgType, setProductImgType] = useState<'link' | 'file'>('link');
+  const [heroImgType, setHeroImgType] = useState<'link' | 'file'>('link');
 
   // فورم إضافة منتج جديد
   const [newProduct, setNewProduct] = useState({
     title: '',
     price: '',
-    category: 'home', // الافتراضي الصفحة الرئيسية
+    category: 'home',
     description: '',
     image: 'https://images.unsplash.com/photo-1762606368623-81bb2d5f5778?q=80'
   });
 
-  // مصفوفة المنتجات الافتراضية مع تحديد القسم لكل منتج
+  // مصفوفة المنتجات الافتراضية المربوطة بالـ localStorage
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('products');
     return saved ? JSON.parse(saved) : [
       { id: 1, title: "غرفة نوم عصرية متكاملة", price: "4,500 ر.س", category: "home", image: "https://images.unsplash.com/photo-1762606368623-81bb2d5f5778?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" },
-      { id: 2, title: "سرير خشبي بتصميم مبسط", price: "2,200 ر.س", category: "home", image: "https://images.unsplash.com/photo-1768253445-49fa5f4a801f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" },
+      { id: 2, title: "سرير خشبي بتصميم مبسط", price: "2,200 ر.س", category: "home", image: "https://images.unsplash.com/photo-1768253843445-49fa5f4a801f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" },
       { id: 3, title: "غرفة نوم رئيسية فاخرة", price: "6,800 ر.س", category: "home", image: "https://images.unsplash.com/photo-1772563214602-3c6434766700?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" },
-      { id: 4, title: "طقم غرفة نوم أطفال", price: "3,100 ر.س", category: "home", image: "https://images.unsplash.com/photo-1769690398773-7bd5122ab719?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" },
-      { id: 5, title: "دولاب ملابس حديث", price: "1,850 ر.س", category: "home", image: "https://images.unsplash.com/photo-1769690398694-9c5d5ca4b4ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" },
-      { id: 6, title: "طقم سرير كلاسيكي فخم", price: "7,500 ر.س", category: "home", image: "https://images.unsplash.com/photo-1712172424737-fb0e5bb99e18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" }
     ];
   });
 
@@ -44,6 +44,22 @@ export default function AdminDashboard() {
     localStorage.setItem('homeSettings', JSON.stringify(homeSettings));
   }, [products, homeSettings]);
 
+  // دالة تحويل الملفات المرفوعة إلى مسار نصي Base64 ليحفظ في الـ localStorage
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, target: 'product' | 'hero') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (target === 'product') {
+          setNewProduct({ ...newProduct, image: reader.result as string });
+        } else {
+          setHomeSettings({ ...homeSettings, heroImage: reader.result as string });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleDelete = (id: number) => {
     if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
       setProducts(products.filter((p: any) => p.id !== id));
@@ -56,7 +72,7 @@ export default function AdminDashboard() {
       id: Date.now(),
       title: newProduct.title,
       price: Number(newProduct.price).toLocaleString() + " ر.س",
-      category: newProduct.category, // هنا بنحفظ القسم صح
+      category: newProduct.category,
       image: newProduct.image
     };
     setProducts([productToAdd, ...products]);
@@ -119,7 +135,6 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="col-span-2"><label className="block text-gray-700 font-bold mb-2">اسم المنتج</label><input type="text" required value={newProduct.title} onChange={(e) => setNewProduct({...newProduct, title: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-500 outline-none" /></div>
                 
-                {/* قائمة الأقسام مضاف إليها خيار الصفحة الرئيسية */}
                 <div>
                   <label className="block text-gray-700 font-bold mb-2">تحديد القسم المعروض فيه</label>
                   <select value={newProduct.category} onChange={(e) => setNewProduct({...newProduct, category: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
@@ -132,7 +147,29 @@ export default function AdminDashboard() {
                 </div>
 
                 <div><label className="block text-gray-700 font-bold mb-2">السعر (ر.س)</label><input type="number" required value={newProduct.price} onChange={(e) => setNewProduct({...newProduct, price: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-500 outline-none" /></div>
-                <div className="col-span-2"><label className="block text-gray-700 font-bold mb-2">رابط صورة المنتج</label><input type="url" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-500 outline-none" /></div>
+                
+                {/* الجزء المطور لاختيار طريقة رفع صورة المنتج */}
+                <div className="col-span-2 space-y-3">
+                  <label className="block text-gray-700 font-bold">طريقة إضافة صورة المنتج</label>
+                  <div className="flex gap-4">
+                    <button type="button" onClick={() => setProductImgType('link')} className={`flex-1 py-2 px-4 rounded-xl font-bold border text-sm flex items-center justify-center gap-2 transition-all ${productImgType === 'link' ? 'bg-blue-950 text-white border-blue-950' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>
+                      <LinkIcon size={16} /> إضافة رابط (URL)
+                    </button>
+                    <button type="button" onClick={() => setProductImgType('file')} className={`flex-1 py-2 px-4 rounded-xl font-bold border text-sm flex items-center justify-center gap-2 transition-all ${productImgType === 'file' ? 'bg-blue-950 text-white border-blue-950' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>
+                      <Upload size={16} /> رفع من الجهاز
+                    </button>
+                  </div>
+
+                  {productImgType === 'link' ? (
+                    <input type="url" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-500 outline-none" placeholder="https://example.com/product.jpg" />
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 text-center hover:bg-gray-100/50 transition-colors relative">
+                      <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'product')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <Upload className="mx-auto text-gray-400 mb-2" size={28} />
+                      <span className="text-sm text-gray-600 block">اضغط هنا أو اسحب صورة المنتج لرفعها</span>
+                    </div>
+                  )}
+                </div>
               </div>
               <button type="submit" className="w-full bg-amber-500 text-white font-bold py-4 rounded-xl hover:bg-amber-600 transition-colors">حفظ وإضافة المنتج</button>
             </form>
@@ -143,6 +180,8 @@ export default function AdminDashboard() {
         {view === 'settings' && (
           <div className="space-y-8 max-w-3xl">
             <h2 className="text-2xl font-bold text-blue-950 mb-4 flex items-center gap-2"><Settings className="text-amber-500" /> إعدادات الواجهة الرئيسية</h2>
+            
+            {/* 1️⃣ نصوص البانر */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
               <h3 className="text-lg font-bold text-blue-950 border-b pb-2">1️⃣ تعديل نصوص البانر الرئيسي</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -151,11 +190,34 @@ export default function AdminDashboard() {
               </div>
               <button onClick={() => { localStorage.setItem('homeSettings', JSON.stringify(homeSettings)); alert('تم حفظ النصوص بنجاح! 📝'); }} className="bg-blue-950 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-900">حفظ النصوص فقط</button>
             </div>
+
+            {/* 2️⃣ صورة الخلفية (مضاف إليها خيار الرفع أو اللينك) */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
               <h3 className="text-lg font-bold text-blue-950 border-b pb-2">2️⃣ صورة خلفية البانر (Hero Image)</h3>
-              <div><label className="block text-sm font-bold mb-2">رابط الصورة الحالية</label><input type="url" value={homeSettings.heroImage} onChange={(e) => setHomeSettings({...homeSettings, heroImage: e.target.value})} className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-amber-500" /></div>
+              
+              <div className="flex gap-4 mb-2">
+                <button type="button" onClick={() => setHeroImgType('link')} className={`flex-1 py-2 px-4 rounded-xl font-bold border text-sm flex items-center justify-center gap-2 transition-all ${heroImgType === 'link' ? 'bg-blue-950 text-white border-blue-950' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>
+                  <LinkIcon size={14} /> رابط (URL)
+                </button>
+                <button type="button" onClick={() => setHeroImgType('file')} className={`flex-1 py-2 px-4 rounded-xl font-bold border text-sm flex items-center justify-center gap-2 transition-all ${heroImgType === 'file' ? 'bg-blue-950 text-white border-blue-950' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>
+                  <Upload size={14} /> رفع من الجهاز
+                </button>
+              </div>
+
+              {heroImgType === 'link' ? (
+                <div><label className="block text-sm font-bold mb-2">رابط الصورة الحالي</label><input type="url" value={homeSettings.heroImage} onChange={(e) => setHomeSettings({...homeSettings, heroImage: e.target.value})} className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-amber-500" /></div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 text-center hover:bg-gray-100/50 transition-colors relative">
+                  <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'hero')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <Upload className="mx-auto text-gray-400 mb-2" size={24} />
+                  <span className="text-sm text-gray-600 block">اضغط هنا لاختيار صورة بانر جديدة من جهازك</span>
+                </div>
+              )}
+
               <button onClick={() => { localStorage.setItem('homeSettings', JSON.stringify(homeSettings)); alert('تم حفظ صورة البانر بنجاح! 🖼️'); }} className="bg-blue-950 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-900">حفظ الصورة فقط</button>
             </div>
+
+            {/* 3️⃣ التحكم في العرض والعدد */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
               <h3 className="text-lg font-bold text-blue-950 border-b pb-2">3️⃣ التحكم في عرض العناصر</h3>
               <div className="flex flex-wrap gap-8 items-center">
