@@ -1,5 +1,4 @@
-﻿using FurniShop.API.Repositories.Interfaces;
-using Furniture_E_Commerce.Models;
+﻿using Furniture_E_Commerce.Models;
 using Furniture_E_Commerce.Models.Enums;
 
 namespace Furniture_E_Commerce.Repositories.Interfaces
