@@ -1,4 +1,8 @@
-﻿namespace Furniture_E_Commerce.DTOs
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Furniture_E_Commerce.DTOs.Financial
 {
     public class MonthlyRevenueDto
     {
