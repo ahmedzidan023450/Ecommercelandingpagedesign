@@ -1,4 +1,4 @@
-﻿using Furniture_E_Commerce.DTOs;
+﻿using Furniture_E_Commerce.DTOs.Financial;
 using Furniture_E_Commerce.Models;
 
 namespace Furniture_E_Commerce.Repositories.Interfaces

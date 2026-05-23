@@ -1,4 +1,5 @@
 using Furniture_E_Commerce.Data;
+using Furniture_E_Commerce.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace Furniture_E_Commerce
@@ -13,7 +14,7 @@ namespace Furniture_E_Commerce
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
-
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddControllers();
 
             // Swagger / OpenAPI

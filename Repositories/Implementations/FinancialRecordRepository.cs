@@ -1,5 +1,5 @@
 ﻿using Furniture_E_Commerce.Data;
-using Furniture_E_Commerce.DTOs;
+using Furniture_E_Commerce.DTOs.Financial;
 using Furniture_E_Commerce.Models;
 using Furniture_E_Commerce.Models.Enums;
 using Furniture_E_Commerce.Repositories.Interfaces;
