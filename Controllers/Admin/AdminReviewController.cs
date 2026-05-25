@@ -1,15 +1,17 @@
-﻿using Furniture_E_Commerce.Services.Interfaces;
+﻿using Furniture_E_Commerce.Services.Interfaces.Admin;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Furniture_E_Commerce.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/reviews")]
+    [Authorize(Roles = "Admin")]
     public class AdminReviewsController : ControllerBase
     {
-        private readonly IAdminService _adminService;
+        private readonly IAdminReviewService _adminService;
 
-        public AdminReviewsController(IAdminService adminService)
+        public AdminReviewsController(IAdminReviewService adminService)
         {
             _adminService = adminService;
         }
@@ -27,6 +29,7 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpPatch("{id:int}/hide")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> HideReview(int id)
         {
             await _adminService.HideReviewAsync(id);
@@ -38,6 +41,8 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpPatch("{id:int}/unhide")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> UnhideReview(int id)
         {
             await _adminService.UnhideReviewAsync(id);
@@ -49,6 +54,7 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteReview(int id)
         {
             await _adminService.DeleteReviewAsync(id);

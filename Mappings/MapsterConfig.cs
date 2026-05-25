@@ -4,6 +4,9 @@ using Furniture_E_Commerce.DTOs.Products;
 using Furniture_E_Commerce.DTOs.Categories;
 using Furniture_E_Commerce.DTOs.Reviews;
 using Furniture_E_Commerce.DTOs.Users;
+using Furniture_E_Commerce.DTOs.Cart;
+using Furniture_E_Commerce.DTOs.Orders;
+using Furniture_E_Commerce.DTOs.Discounts;
 
 namespace Furniture_E_Commerce.Mappings
 {
@@ -16,12 +19,7 @@ namespace Furniture_E_Commerce.Mappings
             // =========================
 
             TypeAdapterConfig<ProductImage, ProductImageDto>
-                .NewConfig()
-                .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.Url, src => src.Url)
-                .Map(dest => dest.AltText, src => src.AltText)
-                .Map(dest => dest.IsPrimary, src => src.IsPrimary)
-                .Map(dest => dest.DisplayOrder, src => src.DisplayOrder);
+                .NewConfig();
 
             // =========================
             // PRODUCT → CARD
@@ -60,38 +58,11 @@ namespace Furniture_E_Commerce.Mappings
                     src => src.DiscountedPrice);
 
             // =========================
-            // CREATE / UPDATE → PRODUCT
-            // =========================
-
-            TypeAdapterConfig<CreateProductDto, Product>
-                .NewConfig()
-                .Ignore(dest => dest.Id)
-                .Ignore(dest => dest.Slug)
-                .Ignore(dest => dest.CreatedAt)
-                .Ignore(dest => dest.Images)
-                .Ignore(dest => dest.Reviews)
-                .Ignore(dest => dest.OrderItems)
-                .Ignore(dest => dest.CartItems);
-
-            TypeAdapterConfig<UpdateProductDto, Product>
-                .NewConfig()
-                .Ignore(dest => dest.Id)
-                .Ignore(dest => dest.Slug)
-                .Ignore(dest => dest.CreatedAt)
-                .Ignore(dest => dest.Images)
-                .Ignore(dest => dest.Reviews)
-                .Ignore(dest => dest.OrderItems)
-                .Ignore(dest => dest.CartItems);
-
-            // =========================
             // CATEGORY
             // =========================
 
-            TypeAdapterConfig<Category, CategoryDto>
-                .NewConfig();
-
-            TypeAdapterConfig<CreateCategoryDto, Category>
-                .NewConfig();
+            TypeAdapterConfig<Category, CategoryDto>.NewConfig();
+            TypeAdapterConfig<CreateCategoryDto, Category>.NewConfig();
 
             // =========================
             // REVIEW
@@ -106,6 +77,61 @@ namespace Furniture_E_Commerce.Mappings
             // =========================
 
             TypeAdapterConfig<User, UserDto>
+                .NewConfig()
+                .Map(dest => dest.Fullname, src => src.FullName)
+                .Map(dest => dest.CreatedDate, src => src.CreatedAt);
+
+            TypeAdapterConfig<User, UserDetailsDto>
+                .NewConfig();
+
+            // =========================
+            // CART
+            // =========================
+
+            TypeAdapterConfig<Cart, CartDto>
+                .NewConfig()
+                .Map(dest => dest.Items, src => src.Items)
+                .Map(dest => dest.TotalAmount,
+                    src => src.Items.Sum(i => i.Product.Price * i.Quantity));
+
+            TypeAdapterConfig<CartItem, CartItemDto>
+                .NewConfig()
+                .Map(dest => dest.ProductId, src => src.ProductId)
+                .Map(dest => dest.ProductName, src => src.Product.Name)
+                .Map(dest => dest.UnitPrice, src => src.Product.Price)
+                .Map(dest => dest.Quantity, src => src.Quantity)
+                .Map(dest => dest.Total, src => src.Product.Price * src.Quantity)
+                .Map(dest => dest.ImageUrl,
+                    src => src.Product.Images
+                        .OrderBy(i => i.DisplayOrder)
+                        .Select(i => i.Url)
+                        .FirstOrDefault());
+
+            // =========================
+            // ORDER
+            // =========================
+
+            TypeAdapterConfig<Order, OrderDto>
+                .NewConfig();
+
+            TypeAdapterConfig<Order, OrderListDto>
+                .NewConfig()
+                .Map(dest => dest.CustomerName, src => src.User.FullName)
+                .Map(dest => dest.ItemsCount, src => src.Items.Count);
+
+            TypeAdapterConfig<Order, OrderDetailsDto>
+                .NewConfig()
+                .Map(dest => dest.Items, src => src.Items);
+
+            TypeAdapterConfig<OrderItem, OrderItemDto>
+                .NewConfig()
+                .Map(dest => dest.Total, src => src.TotalPrice);
+
+            // =========================
+            // DISCOUNT
+            // =========================
+
+            TypeAdapterConfig<Discount, DiscountDto>
                 .NewConfig();
         }
     }

@@ -1,16 +1,16 @@
 ﻿using Furniture_E_Commerce.DTOs.Reviews;
 using Furniture_E_Commerce.Repositories.Interfaces;
-using Furniture_E_Commerce.Services.Interfaces;
+using Furniture_E_Commerce.Services.Interfaces.Admin;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace Furniture_E_Commerce.Services.Implementations
+namespace Furniture_E_Commerce.Services.Implementations.Admin
 {
-    public class ReviewService : IReviewService
+    public class AdminReviewService : IAdminReviewService
     {
         private readonly IReviewRepository _reviewRepo;
 
-        public ReviewService(IReviewRepository reviewRepo)
+        public AdminReviewService(IReviewRepository reviewRepo)
         {
             _reviewRepo = reviewRepo;
         }

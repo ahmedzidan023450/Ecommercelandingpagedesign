@@ -1,17 +1,17 @@
 ﻿using Furniture_E_Commerce.DTOs.Orders;
 using Furniture_E_Commerce.Models.Enums;
 using Furniture_E_Commerce.Repositories.Interfaces;
-using Furniture_E_Commerce.Services.Interfaces;
+using Furniture_E_Commerce.Services.Interfaces.Admin;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace Furniture_E_Commerce.Services.Implementations
+namespace Furniture_E_Commerce.Services.Implementations.Admin
 {
-    public class OrderService : IOrderService
+    public class AdminOrderService : IAdminOrderService
     {
         private readonly IOrderRepository _orderRepo;
 
-        public OrderService(IOrderRepository orderRepo)
+        public AdminOrderService(IOrderRepository orderRepo)
         {
             _orderRepo = orderRepo;
         }

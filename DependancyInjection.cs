@@ -1,8 +1,12 @@
-﻿using Furniture_E_Commerce.Repositories.Implementations;
+﻿using Furniture_E_Commerce.Models;
+using Furniture_E_Commerce.Repositories.Implementations;
 using Furniture_E_Commerce.Repositories.Interfaces;
 using Furniture_E_Commerce.Services.Implementations;
+using Furniture_E_Commerce.Services.Implementations.Admin;
+using Furniture_E_Commerce.Services.Implementations.Auth;
 using Furniture_E_Commerce.Services.Interfaces;
 using Furniture_E_Commerce.Services.Interfaces.Admin;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,15 +29,31 @@ namespace Furniture_E_Commerce
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-           
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             return services;
         }
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
 
-            services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+            services.AddScoped<IAdminUserService, AdminUserService>();
+            services.AddScoped<IAdminOrderService, AdminOrderService>();
+            services.AddScoped<IAdminReviewService, AdminReviewService>();
+            services.AddScoped<IAdminFinancialService, AdminFinancialService>();
+            services.AddScoped<IAdminDiscountService, AdminDiscountService>();
+            services.AddScoped<IAdminCategoryService, AdminCategoryService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICartService, CartService>();
             services.AddScoped<ICategoryService, CategoryService>();
-
+            services.AddScoped<IDiscountService, DiscountService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             return services;
         }
     }

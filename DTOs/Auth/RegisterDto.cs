@@ -15,5 +15,7 @@ namespace Furniture_E_Commerce.DTOs.Auth
         public string ConfirmPassword { get; set; } = string.Empty;
 
         public string? PhoneNumber { get; set; }
+        public string? AdminCode { get; set; }
+
     }
 }

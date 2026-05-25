@@ -26,13 +26,17 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
             _financialRepo = financialRepo;
         }
 
+        // =========================
+        // MAIN STATS (Dashboard KPIs)
+        // =========================
         public async Task<DashboardStatsDto> GetDashboardStatsAsync()
         {
             var totalUsers = await _userRepo.CountAsync();
             var totalOrders = await _orderRepo.CountAsync();
             var totalProducts = await _productRepo.CountAsync();
 
-            var totalRevenue = await _financialRepo.Query().AsNoTracking()
+            var totalRevenue = await _financialRepo.Query()
+                .AsNoTracking()
                 .Where(f => f.Type == FinancialRecordType.Revenue)
                 .SumAsync(f => f.Amount);
 
@@ -45,6 +49,9 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
             };
         }
 
+        // =========================
+        // CHART DATA
+        // =========================
         public async Task<IEnumerable<MonthlyRevenueDto>> GetMonthlyRevenueAsync(int months = 12)
         {
             return await _financialRepo.GetMonthlyRevenueAsync(months);

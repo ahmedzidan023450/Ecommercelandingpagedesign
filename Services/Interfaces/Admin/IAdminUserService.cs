@@ -1,8 +1,8 @@
 ﻿using Furniture_E_Commerce.DTOs.Users;
 
-namespace Furniture_E_Commerce.Services.Interfaces
+namespace Furniture_E_Commerce.Services.Interfaces.Admin
 {
-    public interface IUserService
+    public interface IAdminUserService
     {
         Task<(IEnumerable<UserDto> Items, int TotalCount)> GetUsersPagedAsync(
             int page, int pageSize, string? search = null, bool? isBlocked = null);

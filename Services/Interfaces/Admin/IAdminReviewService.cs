@@ -1,8 +1,8 @@
 ﻿using Furniture_E_Commerce.DTOs.Reviews;
 
-namespace Furniture_E_Commerce.Services.Interfaces
+namespace Furniture_E_Commerce.Services.Interfaces.Admin
 {
-    public interface IReviewService
+    public interface IAdminReviewService
     {
         Task<(IEnumerable<ReviewDto> Items, int TotalCount)> GetReviewsPagedAsync(
             int page, int pageSize, bool? isHidden = null);

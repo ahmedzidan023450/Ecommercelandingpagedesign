@@ -1,16 +1,17 @@
 ﻿using Furniture_E_Commerce.DTOs.Categories;
 using Furniture_E_Commerce.Services.Interfaces.Admin;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Furniture_E_Commerce.Controllers.Admin
+namespace Furniture_E_Commerce.Controllers
 {
-    [Route("api/admin/categories")]
+    [Route("api/categories")]
     [ApiController]
-    public class AdminCategoryController : ControllerBase
+    public class CategoryController : ControllerBase
     {
-        private readonly ICategoryService _service;
+        private readonly IAdminCategoryService _service;
 
-        public AdminCategoryController(ICategoryService service)
+        public CategoryController(IAdminCategoryService service)
         {
             _service = service;
         }
@@ -30,6 +31,7 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(CreateCategoryDto dto)
         {
             var result = await _service.CreateAsync(dto);
@@ -37,6 +39,7 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
         {
             await _service.UpdateAsync(id, dto);
@@ -44,6 +47,7 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteAsync(id);

@@ -1,15 +1,17 @@
-﻿using Furniture_E_Commerce.Services.Interfaces;
+﻿using Furniture_E_Commerce.Services.Interfaces.Admin;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Furniture_E_Commerce.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/financial")]
+    [Authorize(Roles = "Admin")]
     public class AdminFinancialController : ControllerBase
     {
-        private readonly IAdminService _adminService;
+        private readonly IAdminFinancialService _adminService;
 
-        public AdminFinancialController(IAdminService adminService)
+        public AdminFinancialController(IAdminFinancialService adminService)
         {
             _adminService = adminService;
         }

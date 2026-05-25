@@ -1,16 +1,16 @@
 ﻿using Furniture_E_Commerce.DTOs.Users;
 using Furniture_E_Commerce.Repositories.Interfaces;
-using Furniture_E_Commerce.Services.Interfaces;
+using Furniture_E_Commerce.Services.Interfaces.Admin;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace Furniture_E_Commerce.Services.Implementations
+namespace Furniture_E_Commerce.Services.Implementations.Admin
 {
-    public class UserService : IUserService
+    public class AdminUserService : IAdminUserService
     {
         private readonly IUserRepository _userRepo;
 
-        public UserService(IUserRepository userRepo)
+        public AdminUserService(IUserRepository userRepo)
         {
             _userRepo = userRepo;
         }

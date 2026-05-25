@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore; // Add this if missing
 using Mapster;
 using Furniture_E_Commerce.Services.Interfaces.Admin;
 
-namespace Furniture_E_Commerce.Services.Implementations
+namespace Furniture_E_Commerce.Services.Implementations.Admin
 {
-    public class CategoryService : ICategoryService
+    public class AdminCategoryService : IAdminCategoryService
     {
         private readonly ICategoryRepository _repo;
 
-        public CategoryService(ICategoryRepository repo)
+        public AdminCategoryService(ICategoryRepository repo)
         {
             _repo = repo;
         }

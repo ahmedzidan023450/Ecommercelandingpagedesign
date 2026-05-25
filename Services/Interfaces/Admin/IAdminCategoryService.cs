@@ -2,7 +2,7 @@
 
 namespace Furniture_E_Commerce.Services.Interfaces.Admin
 {
-    public interface ICategoryService
+    public interface IAdminCategoryService
     {
         Task<IEnumerable<CategoryDto>> GetAllAsync();
         Task<CategoryDto?> GetByIdAsync(int id);
