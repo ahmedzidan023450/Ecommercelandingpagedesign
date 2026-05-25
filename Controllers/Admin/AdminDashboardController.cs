@@ -1,4 +1,4 @@
-﻿using Furniture_E_Commerce.Services.Interfaces;
+﻿using Furniture_E_Commerce.Services.Interfaces.Admin;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Furniture_E_Commerce.Controllers.Admin

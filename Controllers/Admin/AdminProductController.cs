@@ -21,8 +21,16 @@ namespace Furniture_E_Commerce.Controllers.Admin
             int pageSize = 10,
             string? search = null)
         {
-            var result = await _adminService.GetProductsPagedAsync(page, pageSize, search);
-            return Ok(result);
+            var (items, totalCount) = await _adminService.GetProductsPagedAsync(page, pageSize, search);
+
+            return Ok(new
+            {
+                items,
+                totalCount,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            });
         }
 
         [HttpGet("{id:int}")]
@@ -33,21 +41,16 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(
-            [FromForm] CreateProductDto dto,
-            List<IFormFile> images)
+        public async Task<IActionResult> CreateProduct([FromForm] CreateProductDto dto)
         {
-            var result = await _adminService.CreateProductAsync(dto, images);
+            var result = await _adminService.CreateProductAsync(dto);
             return CreatedAtAction(nameof(GetProduct), new { id = result.Id }, result);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateProduct(
-            int id,
-            [FromForm] UpdateProductDto dto,
-            List<IFormFile>? images)
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] UpdateProductDto dto)
         {
-            var result = await _adminService.UpdateProductAsync(id, dto, images);
+            var result = await _adminService.UpdateProductAsync(id, dto);
             return Ok(result);
         }
 

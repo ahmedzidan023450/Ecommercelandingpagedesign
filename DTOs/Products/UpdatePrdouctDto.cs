@@ -17,5 +17,7 @@ namespace Furniture_E_Commerce.DTOs.Products
         public int CategoryId { get; set; }
 
         public int? DiscountId { get; set; }
+        public List<IFormFile>? Images { get; set; }  // ← ADD
+
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Furniture_E_Commerce.DTOs.Categories;
 
-namespace Furniture_E_Commerce.Services.Interfaces
+namespace Furniture_E_Commerce.Services.Interfaces.Admin
 {
     public interface ICategoryService
     {

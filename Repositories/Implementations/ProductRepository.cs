@@ -9,27 +9,30 @@ namespace Furniture_E_Commerce.Repositories.Implementations
     {
         public ProductRepository(ApplicationDbContext context) : base(context) { }
 
-        public IQueryable<Product> Query() => _context.Set<Product>();
+        // ← REMOVED duplicate Query() override
 
         public async Task<Product?> GetBySlugAsync(string slug)
         {
             return await _context.Products
+                .Include(x => x.Images)
+                .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Slug == slug);
         }
 
-        public async Task<Product?> GetWithDetailsAsync(int id)
+        public async Task<Product?> GetWithDetailsAsync(int productId)
         {
             return await _context.Products
-                .Include(x => x.Images)
-                .Include(x => x.Category)
-                .Include(x => x.Discount)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .Include(p => p.Images)
+                .Include(p => p.Category)
+                .Include(p => p.Discount)
+                .FirstOrDefaultAsync(p => p.Id == productId);
         }
 
         public async Task<Product?> GetWithReviewsAsync(int id)
         {
             return await _context.Products
                 .Include(x => x.Reviews)
+                    .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -43,7 +46,11 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             string? sortBy = null,
             bool sortDesc = false)
         {
-            var query = _context.Products.AsNoTracking();
+            var query = _context.Products
+                .Include(x => x.Images)      // ← was missing
+                .Include(x => x.Category)    // ← was missing
+                .Include(x => x.Discount)    // ← was missing
+                .AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(x => x.Name.Contains(search));
@@ -57,8 +64,21 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             if (maxPrice.HasValue)
                 query = query.Where(x => x.Price <= maxPrice);
 
-            var total = await query.CountAsync();
+            query = sortBy switch
+            {
+                "price" => sortDesc
+                    ? query.OrderByDescending(x => x.Price)
+                    : query.OrderBy(x => x.Price),
+                "rating" => sortDesc
+                    ? query.OrderByDescending(x => x.AverageRating)
+                    : query.OrderBy(x => x.AverageRating),
+                "name" => sortDesc
+                    ? query.OrderByDescending(x => x.Name)
+                    : query.OrderBy(x => x.Name),
+                _ => query.OrderByDescending(x => x.CreatedAt) // default
+            };
 
+            var total = await query.CountAsync();
             var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -70,6 +90,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
         public async Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId)
         {
             return await _context.Products
+                .Include(x => x.Images)
                 .Where(x => x.CategoryId == categoryId)
                 .ToListAsync();
         }
@@ -78,15 +99,22 @@ namespace Furniture_E_Commerce.Repositories.Implementations
         {
             return await _context.Products
                 .Where(x => x.StockQuantity <= threshold)
+                .OrderBy(x => x.StockQuantity)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Product>> GetTopSellingAsync(int count = 10)
         {
             return await _context.Products
+                .Include(x => x.Images)
                 .OrderByDescending(x => x.SoldCount)
                 .Take(count)
                 .ToListAsync();
+        }
+
+        public async Task AddImagesAsync(List<ProductImage> images)
+        {
+            await _context.ProductImages.AddRangeAsync(images);
         }
 
         public async Task<bool> SlugExistsAsync(string slug, int? excludeId = null)
@@ -101,6 +129,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             if (product == null) return;
 
             product.StockQuantity += delta;
+            await _context.SaveChangesAsync();  // ← was missing SaveChanges
         }
 
         public async Task UpdateRatingAsync(int productId, decimal avgRating, int reviewCount)
@@ -110,6 +139,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
 
             product.AverageRating = avgRating;
             product.ReviewCount = reviewCount;
+            await _context.SaveChangesAsync();  // ← was missing SaveChanges
         }
     }
 }

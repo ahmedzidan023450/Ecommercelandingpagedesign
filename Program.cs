@@ -130,6 +130,7 @@ namespace Furniture_E_Commerce
 
             var app = builder.Build();
 
+
             
             if (app.Environment.IsDevelopment())
             {
@@ -143,6 +144,8 @@ namespace Furniture_E_Commerce
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseStaticFiles(); 
 
             app.MapControllers();
 

@@ -1,9 +1,9 @@
 ﻿using Furniture_E_Commerce.DTOs.Categories;
 using Furniture_E_Commerce.Models;
 using Furniture_E_Commerce.Repositories.Interfaces;
-using Furniture_E_Commerce.Services.Interfaces;
 using Microsoft.EntityFrameworkCore; // Add this if missing
 using Mapster;
+using Furniture_E_Commerce.Services.Interfaces.Admin;
 
 namespace Furniture_E_Commerce.Services.Implementations
 {

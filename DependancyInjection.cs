@@ -2,6 +2,7 @@
 using Furniture_E_Commerce.Repositories.Interfaces;
 using Furniture_E_Commerce.Services.Implementations;
 using Furniture_E_Commerce.Services.Interfaces;
+using Furniture_E_Commerce.Services.Interfaces.Admin;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -77,16 +77,10 @@ namespace Furniture_E_Commerce.Services.Implementations
             var query = _userRepo.Query().AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(u =>
-                    u.FullName.Contains(search) ||
-                    u.Email.Contains(search));
-            }
+                query = query.Where(u => u.FullName.Contains(search) || u.Email.Contains(search));
 
             if (isBlocked.HasValue)
-            {
                 query = query.Where(u => u.IsBlocked == isBlocked.Value);
-            }
 
             var totalCount = await query.CountAsync();
 
@@ -96,10 +90,7 @@ namespace Furniture_E_Commerce.Services.Implementations
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (
-                users.Adapt<IEnumerable<UserDto>>(),
-                totalCount
-            );
+            return (users.Adapt<IEnumerable<UserDto>>(), totalCount);
         }
 
         public async Task<UserDetailsDto?> GetUserDetailsAsync(int userId)
@@ -112,7 +103,6 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null) throw new Exception("User not found");
-
             user.IsBlocked = true;
             _userRepo.Update(user);
             await _userRepo.SaveChangesAsync();
@@ -122,7 +112,6 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null) throw new Exception("User not found");
-
             user.IsBlocked = false;
             _userRepo.Update(user);
             await _userRepo.SaveChangesAsync();
@@ -132,7 +121,6 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null) throw new Exception("User not found");
-
             _userRepo.Delete(user);
             await _userRepo.SaveChangesAsync();
         }
@@ -147,62 +135,162 @@ namespace Furniture_E_Commerce.Services.Implementations
             var query = _productRepo.Query().AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(search))
-            {
                 query = query.Where(p => p.Name.Contains(search));
-            }
 
             var totalCount = await query.CountAsync();
 
             var products = await query
                 .Include(p => p.Images)
                 .Include(p => p.Category)
+                .Include(p => p.Discount)
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            var mapped = products.Adapt<List<ProductCardDto>>();
-            return (mapped, totalCount);
+            return (products.Adapt<List<ProductCardDto>>(), totalCount);
         }
 
         public async Task<ProductDetailsDto?> GetProductDetailsAsync(int productId)
         {
-            var product = await _productRepo.GetWithDetailsAsync(productId);
+            var product = await _productRepo
+                .GetWithDetailsAsync(productId);
             return product == null ? null : product.Adapt<ProductDetailsDto>();
         }
 
-        public async Task<ProductDetailsDto> CreateProductAsync(CreateProductDto dto, List<IFormFile> images)
+        public async Task<ProductDetailsDto> CreateProductAsync(CreateProductDto dto)
         {
+            // 1. Map DTO to Product (images ignored by Mapster)
             var product = dto.Adapt<Product>();
 
+            if (product.DiscountId.HasValue)
+            {
+                var discount = await _discountRepo
+                    .GetByIdAsync(product.DiscountId.Value);
+
+                if (discount != null && discount.IsActive)
+                {
+                    product.DiscountedPrice =
+                        product.Price -
+                        (product.Price * discount.Value / 100);
+                }
+            }
+            else
+            {
+                product.DiscountedPrice = null;
+            }
+            // 2. Auto-generate slug
+            product.Slug = dto.Name.ToLower().Trim().Replace(" ", "-").Replace("'", "")
+                + "-" + Guid.NewGuid().ToString("N")[..6];
+
+            // 3. Save product to get its Id
             await _productRepo.AddAsync(product);
             await _productRepo.SaveChangesAsync();
 
-            return product.Adapt<ProductDetailsDto>();
+            // 4. Save images to disk + DB
+            if (dto.Images != null && dto.Images.Count > 0)
+            {
+                var imageEntities = new List<ProductImage>();
+                int order = 0;
+
+                foreach (var file in dto.Images)
+                {
+                    if (file.Length == 0) continue;
+
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    var folderPath = Path.Combine(
+                        Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
+
+                    Directory.CreateDirectory(folderPath);
+
+                    using var stream = new FileStream(Path.Combine(folderPath, fileName), FileMode.Create);
+                    await file.CopyToAsync(stream);
+
+                    imageEntities.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        Url = $"/images/products/{fileName}",
+                        IsPrimary = order == 0,
+                        DisplayOrder = order++
+                    });
+                }
+
+                await _productRepo.AddImagesAsync(imageEntities);
+                await _productRepo.SaveChangesAsync();
+            }
+
+            // 5. Reload with full includes so response has category + images
+            var created = await _productRepo.GetWithDetailsAsync(product.Id);
+            return created!.Adapt<ProductDetailsDto>();
         }
 
-        public async Task<ProductDetailsDto> UpdateProductAsync(int productId, UpdateProductDto dto, List<IFormFile>? newImages = null)
+        public async Task<ProductDetailsDto> UpdateProductAsync(int productId, UpdateProductDto dto)
         {
             var product = await _productRepo.GetWithDetailsAsync(productId);
+            if (product == null) throw new Exception("Product not found");
 
-            if (product == null)
-                throw new Exception("Product not found");
-
+            // 1. Map fields (images ignored by Mapster)
             dto.Adapt(product);
+            if (product.DiscountId.HasValue)
+            {
+                var discount = await _discountRepo
+                    .GetByIdAsync(product.DiscountId.Value);
 
+                if (discount != null && discount.IsActive)
+                {
+                    product.DiscountedPrice =
+                        product.Price -
+                        (product.Price * discount.Value / 100);
+                }
+            }
+            else
+            {
+                product.DiscountedPrice = null;
+            }
             product.UpdatedAt = DateTime.UtcNow;
+
+            // 2. Save new images if provided
+            if (dto.Images != null && dto.Images.Count > 0)
+            {
+                var imageEntities = new List<ProductImage>();
+                int order = product.Images.Count;
+
+                foreach (var file in dto.Images)
+                {
+                    if (file.Length == 0) continue;
+
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    var folderPath = Path.Combine(
+                        Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
+
+                    Directory.CreateDirectory(folderPath);
+
+                    using var stream = new FileStream(Path.Combine(folderPath, fileName), FileMode.Create);
+                    await file.CopyToAsync(stream);
+
+                    imageEntities.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        Url = $"/images/products/{fileName}",
+                        IsPrimary = order == 0,
+                        DisplayOrder = order++
+                    });
+                }
+
+                await _productRepo.AddImagesAsync(imageEntities);
+            }
 
             _productRepo.Update(product);
             await _productRepo.SaveChangesAsync();
 
-            return product.Adapt<ProductDetailsDto>();
+            var updated = await _productRepo.GetWithDetailsAsync(productId);
+            return updated!.Adapt<ProductDetailsDto>();
         }
 
         public async Task DeleteProductAsync(int productId)
         {
             var product = await _productRepo.GetByIdAsync(productId);
             if (product == null) throw new Exception("Product not found");
-
             _productRepo.Delete(product);
             await _productRepo.SaveChangesAsync();
         }
@@ -211,9 +299,7 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var product = await _productRepo.GetByIdAsync(productId);
             if (product == null) throw new Exception("Product not found");
-
             product.StockQuantity = quantity;
-
             _productRepo.Update(product);
             await _productRepo.SaveChangesAsync();
         }
@@ -228,9 +314,7 @@ namespace Furniture_E_Commerce.Services.Implementations
             var query = _orderRepo.Query().AsNoTracking();
 
             if (status.HasValue)
-            {
                 query = query.Where(o => o.Status == status.Value);
-            }
 
             var totalCount = await query.CountAsync();
 
@@ -241,10 +325,7 @@ namespace Furniture_E_Commerce.Services.Implementations
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (
-                orders.Adapt<IEnumerable<OrderListDto>>(),
-                totalCount
-            );
+            return (orders.Adapt<IEnumerable<OrderListDto>>(), totalCount);
         }
 
         public async Task<OrderDetailsDto?> GetOrderDetailsAsync(int orderId)
@@ -257,9 +338,7 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var order = await _orderRepo.GetByIdAsync(orderId);
             if (order == null) throw new Exception("Order not found");
-
             order.Status = status;
-
             _orderRepo.Update(order);
             await _orderRepo.SaveChangesAsync();
         }
@@ -274,9 +353,7 @@ namespace Furniture_E_Commerce.Services.Implementations
             var query = _reviewRepo.Query().AsNoTracking();
 
             if (isHidden.HasValue)
-            {
                 query = query.Where(r => r.IsHidden == isHidden.Value);
-            }
 
             var totalCount = await query.CountAsync();
 
@@ -288,19 +365,14 @@ namespace Furniture_E_Commerce.Services.Implementations
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (
-                reviews.Adapt<IEnumerable<ReviewDto>>(),
-                totalCount
-            );
+            return (reviews.Adapt<IEnumerable<ReviewDto>>(), totalCount);
         }
 
         public async Task HideReviewAsync(int reviewId)
         {
             var review = await _reviewRepo.GetByIdAsync(reviewId);
             if (review == null) throw new Exception("Review not found");
-
             review.IsHidden = true;
-
             _reviewRepo.Update(review);
             await _reviewRepo.SaveChangesAsync();
         }
@@ -309,9 +381,7 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var review = await _reviewRepo.GetByIdAsync(reviewId);
             if (review == null) throw new Exception("Review not found");
-
             review.IsHidden = false;
-
             _reviewRepo.Update(review);
             await _reviewRepo.SaveChangesAsync();
         }
@@ -320,7 +390,6 @@ namespace Furniture_E_Commerce.Services.Implementations
         {
             var review = await _reviewRepo.GetByIdAsync(reviewId);
             if (review == null) throw new Exception("Review not found");
-
             _reviewRepo.Delete(review);
             await _reviewRepo.SaveChangesAsync();
         }
@@ -334,6 +403,7 @@ namespace Furniture_E_Commerce.Services.Implementations
             var data = await _financialRepo.GetByMonthYearAsync(month, year);
             return data.Adapt<IEnumerable<FinancialRecordDto>>();
         }
+
         public async Task<decimal> GetTotalRevenueAsync()
         {
             return await _financialRepo.Query().AsNoTracking()
@@ -361,20 +431,15 @@ namespace Furniture_E_Commerce.Services.Implementations
         public async Task<DiscountDto> CreateDiscountAsync(CreateDiscountDto dto)
         {
             var discount = dto.Adapt<Discount>();
-
             await _discountRepo.AddAsync(discount);
             await _discountRepo.SaveChangesAsync();
-
             return discount.Adapt<DiscountDto>();
         }
 
         public async Task DeleteDiscountAsync(int discountId)
         {
             var discount = await _discountRepo.GetByIdAsync(discountId);
-
-            if (discount == null)
-                throw new Exception("Discount not found");
-
+            if (discount == null) throw new Exception("Discount not found");
             _discountRepo.Delete(discount);
             await _discountRepo.SaveChangesAsync();
         }
