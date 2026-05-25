@@ -4,7 +4,6 @@
     {
         Visa = 0,
         PayPal = 1,
-        VodafoneCash = 2,
-        CashOnDelivery = 3
+        CashOnDelivery = 2
     }
 }

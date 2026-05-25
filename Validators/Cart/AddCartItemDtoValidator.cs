@@ -8,7 +8,7 @@ namespace Furniture_E_Commerce.Validators.Cart
     {
         public AddCartItemDtoValidator()
         {
-            RuleFor(x => x.ProductId)
+            RuleFor(x => x.ProductID)
                 .NotEmpty();
 
             RuleFor(x => x.Quantity)

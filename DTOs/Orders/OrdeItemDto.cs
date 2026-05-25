@@ -6,7 +6,7 @@ namespace Furniture_E_Commerce.DTOs.Orders
 {
     public class OrderItemDto
     {
-        public Guid ProductId { get; set; }
+        public int ProductId { get; set; }
 
         public string ProductName { get; set; } = string.Empty;
 

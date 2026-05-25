@@ -36,14 +36,14 @@ namespace Furniture_E_Commerce.Models
 
         // ── Foreign keys ───────────────────────────────────────────────────────
         [Required]
-        public Guid OrderId { get; set; }
+        public int OrderId { get; set; }
 
         /// <summary>
         /// Kept for reference — uses DeleteBehavior.Restrict so order history
         /// is never orphaned if the product is soft-deleted.
         /// </summary>
         [Required]
-        public Guid ProductId { get; set; }
+        public int ProductId { get; set; }
 
         // ── Navigation properties ──────────────────────────────────────────────
         [ForeignKey(nameof(OrderId))]

@@ -7,7 +7,7 @@ namespace Furniture_E_Commerce.DTOs.Users
 {
     public class UserDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Fullname { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? PhoneNumber {  get; set; } 

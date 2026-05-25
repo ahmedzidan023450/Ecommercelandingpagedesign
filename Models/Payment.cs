@@ -9,7 +9,7 @@ namespace Furniture_E_Commerce.Models;
 public class Payment
 {
     [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public int Id { get; set; }
 
     [Required]
     public PaymentMethod Method { get; set; }
@@ -40,7 +40,7 @@ public class Payment
 
     // ── Foreign key (1:1 with Order) ──────────────────────────────────────
     [Required]
-    public Guid OrderId { get; set; }
+    public int OrderId { get; set; }
 
     // ── Navigation property ────────────────────────────────────────────────
     [ForeignKey(nameof(OrderId))]

@@ -16,7 +16,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<IEnumerable<ProductImage>> GetByProductAsync(Guid productId)
+        public async Task<IEnumerable<ProductImage>> GetByProductAsync(int productId)
         {
             return await _context.ProductImages
                 .Where(pi => pi.ProductId == productId)
@@ -24,7 +24,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public async Task<ProductImage?> GetPrimaryAsync(Guid productId)
+        public async Task<ProductImage?> GetPrimaryAsync(int productId)
         {
             return await _context.ProductImages
                 .FirstOrDefaultAsync(pi =>
@@ -32,7 +32,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
                     pi.IsPrimary);
         }
 
-        public async Task ClearPrimaryFlagAsync(Guid productId)
+        public async Task ClearPrimaryFlagAsync(int productId)
         {
             var images = await _context.ProductImages
                 .Where(pi => pi.ProductId == productId && pi.IsPrimary)

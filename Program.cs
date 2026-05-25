@@ -1,11 +1,17 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Furniture_E_Commerce.Data;
+using Furniture_E_Commerce.Filters;
 using Furniture_E_Commerce.Mappings;
+using Furniture_E_Commerce.Services.Implementations;
+using Furniture_E_Commerce.Services.Interfaces;
+using Mapster;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
+using System.Text;
 
 namespace Furniture_E_Commerce
 {
@@ -15,31 +21,66 @@ namespace Furniture_E_Commerce
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ======================================================
-            // DATABASE
-            // ======================================================
+            
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
 
-            // ======================================================
-            // AUTOMAPPER
-            // ======================================================
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
+            
+            MapsterConfig.Register();
 
-            // ======================================================
-            // FLUENT VALIDATION
-            // ======================================================
-            builder.Services.AddControllers();
+            builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+            builder.Services.AddMapster();
+
+
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<ValidationFilter>();
+            });
+            builder.Services.AddRepositories();
+            builder.Services.AddServices();
 
             builder.Services.AddFluentValidationAutoValidation();
-            builder.Services.AddFluentValidationClientsideAdapters();
-            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+            builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
-            // ======================================================
-            // SWAGGER
-            // ======================================================
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+
+                    return new BadRequestObjectResult(new
+                    {
+                        Message = "Validation Failed",
+                        Errors = errors
+                    });
+                };
+            });
+
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    };
+                });
+
+            builder.Services.AddAuthorization();
+
+            
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddSwaggerGen(options =>
@@ -48,18 +89,16 @@ namespace Furniture_E_Commerce
                 {
                     Title = "Furniture E-Commerce API",
                     Version = "v1",
-                    Description = "Furniture E-Commerce Backend API"
+                    Description = "Clean Architecture Backend API"
                 });
 
-                // JWT Auth
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
                     Type = SecuritySchemeType.Http,
                     Scheme = "bearer",
                     BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter JWT Token"
+                    In = ParameterLocation.Header
                 });
 
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -73,14 +112,12 @@ namespace Furniture_E_Commerce
                                 Id = "Bearer"
                             }
                         },
-                        Array.Empty<string>()
+                        new string[] { }
                     }
                 });
             });
 
-            // ======================================================
-            // CORS
-            // ======================================================
+            
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -93,22 +130,11 @@ namespace Furniture_E_Commerce
 
             var app = builder.Build();
 
-            // ======================================================
-            // MIDDLEWARE
-            // ======================================================
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint(
-                        "/swagger/v1/swagger.json",
-                        "Furniture E-Commerce API v1"
-                    );
-
-                    options.RoutePrefix = string.Empty;
-                });
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
@@ -116,7 +142,6 @@ namespace Furniture_E_Commerce
             app.UseCors("AllowAll");
 
             app.UseAuthentication();
-
             app.UseAuthorization();
 
             app.MapControllers();

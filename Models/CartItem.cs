@@ -18,10 +18,10 @@ namespace Furniture_E_Commerce.Models
 
         // ── Foreign keys ───────────────────────────────────────────────────────
         [Required]
-        public Guid CartId { get; set; }
+        public int CartId { get; set; }
 
         [Required]
-        public Guid ProductId { get; set; }
+        public int ProductId { get; set; }
 
         // ── Navigation properties ──────────────────────────────────────────────
         [ForeignKey(nameof(CartId))]

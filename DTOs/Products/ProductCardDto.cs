@@ -6,13 +6,16 @@ namespace Furniture_E_Commerce.DTOs.Products
 {
     public class ProductCardDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
 
         public decimal Price { get; set; }
 
         public decimal? DiscountedPrice { get; set; }
+
+        public List<ProductImageDto> Images { get; set; } = new();
+
 
         public string? MainImageUrl { get; set; }
 

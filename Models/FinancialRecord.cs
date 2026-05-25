@@ -9,8 +9,7 @@ namespace Furniture_E_Commerce.Models;
 public class FinancialRecord
 {
     [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
+    public int Id { get; set; } 
     [Required]
     public FinancialRecordType Type { get; set; }
 
@@ -47,9 +46,9 @@ public class FinancialRecord
     /// <summary>
     /// Nullable — manual records entered by admin may not reference an order.
     /// </summary>
-    public Guid? OrderId { get; set; }
+    public int? OrderId { get; set; }
 
     // ── Navigation property ────────────────────────────────────────────────
-    [ForeignKey(nameof(OrderId))]
+    [ForeignKey(nameof(OrderId))]  
     public virtual Order? Order { get; set; }
 }

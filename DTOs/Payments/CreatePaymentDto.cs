@@ -6,6 +6,6 @@ namespace Furniture_E_Commerce.DTOs.Payments
 {
     public class CreatePaymentDto
     {
-        public Guid OrderId { get; set; }
+        public int OrderId { get; set; }
     }
 }

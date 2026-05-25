@@ -21,7 +21,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
                 .FirstOrDefaultAsync(t => t.TokenHash == tokenHash);
         }
 
-        public async Task<IEnumerable<RefreshToken>> GetActiveTokensByUserAsync(Guid userId)
+        public async Task<IEnumerable<RefreshToken>> GetActiveTokensByUserAsync(int userId)
         {
             return await _context.RefreshTokens
                 .Where(t => t.UserId == userId && !t.IsRevoked)
@@ -29,7 +29,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public async Task RevokeAllUserTokensAsync(Guid userId)
+        public async Task RevokeAllUserTokensAsync(int userId)
         {
             var tokens = await _context.RefreshTokens
                 .Where(t => t.UserId == userId && !t.IsRevoked)

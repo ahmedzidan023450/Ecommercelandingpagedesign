@@ -15,7 +15,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<IEnumerable<OrderItem>> GetByOrderIdAsync(Guid orderId)
+        public async Task<IEnumerable<OrderItem>> GetByOrderIdAsync(int orderId)
         {
             return await _context.OrderItems
                 .Where(oi => oi.OrderId == orderId)

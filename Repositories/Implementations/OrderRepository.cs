@@ -8,106 +8,84 @@ namespace Furniture_E_Commerce.Repositories.Implementations
 {
     public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
-        private readonly ApplicationDbContext _context;
+        public OrderRepository(ApplicationDbContext context) : base(context) { }
 
-        public OrderRepository(ApplicationDbContext context)
-            : base(context)
-        {
-            _context = context;
-        }
+        public IQueryable<Order> Query() => _context.Set<Order>();
 
         public async Task<Order?> GetByOrderNumberAsync(string orderNumber)
         {
             return await _context.Orders
-                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+                .FirstOrDefaultAsync(x => x.OrderNumber == orderNumber);
         }
 
-        public async Task<Order?> GetWithDetailsAsync(Guid orderId)
+        public async Task<Order?> GetWithDetailsAsync(int orderId)
         {
             return await _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.Payment)
-                .Include(o => o.Items)
-                    .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(o => o.Id == orderId);
+                .Include(x => x.Items)
+                .Include(x => x.Payment)
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == orderId);
         }
 
-        public async Task<(IEnumerable<Order> Items, int TotalCount)>
-            GetPagedForUserAsync(Guid userId, int page, int pageSize)
+        public async Task<IEnumerable<Order>> GetByUserIdAsync(int userId)
         {
-            var query = _context.Orders
-                .Where(o => o.UserId == userId);
+            return await _context.Orders
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+        }
 
-            var totalCount = await query.CountAsync();
+        public async Task<(IEnumerable<Order> Items, int TotalCount)> GetPagedForUserAsync(
+            int userId, int page, int pageSize)
+        {
+            var query = _context.Orders.Where(x => x.UserId == userId);
+
+            var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(o => o.PlacedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (items, totalCount);
+            return (items, total);
         }
 
-        public async Task<(IEnumerable<Order> Items, int TotalCount)>
-            GetPagedAsync(
-                int page,
-                int pageSize,
-                OrderStatus? status = null,
-                DateTime? from = null,
-                DateTime? to = null)
+        public async Task<(IEnumerable<Order> Items, int TotalCount)> GetPagedAsync(
+            int page,
+            int pageSize,
+            OrderStatus? status = null,
+            DateTime? from = null,
+            DateTime? to = null)
         {
             var query = _context.Orders.AsQueryable();
 
             if (status.HasValue)
-            {
-                query = query.Where(o => o.Status == status.Value);
-            }
+                query = query.Where(x => x.Status == status);
 
             if (from.HasValue)
-            {
-                query = query.Where(o => o.PlacedAt >= from.Value);
-            }
+                query = query.Where(x => x.PlacedAt >= from);
 
             if (to.HasValue)
-            {
-                query = query.Where(o => o.PlacedAt <= to.Value);
-            }
+                query = query.Where(x => x.PlacedAt <= to);
 
-            var totalCount = await query.CountAsync();
+            var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(o => o.PlacedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (items, totalCount);
+            return (items, total);
         }
 
-        public async Task<bool> UserHasPurchasedProductAsync(
-            Guid userId,
-            Guid productId)
+        public async Task<bool> UserHasPurchasedProductAsync(int userId, int  productId)
         {
             return await _context.OrderItems
-                .AnyAsync(oi =>
-                    oi.ProductId == productId &&
-                    oi.Order.UserId == userId &&
-                    oi.Order.Status == OrderStatus.Delivered);
+                .AnyAsync(x => x.Order.UserId == userId && x.ProductId == productId);
         }
 
         public async Task<string> GenerateOrderNumberAsync()
         {
-            string orderNumber;
-
-            do
-            {
-                orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
-            }
-            while (await _context.Orders
-                .AnyAsync(o => o.OrderNumber == orderNumber));
-
-            return orderNumber;
+            return $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}";
         }
     }
 }

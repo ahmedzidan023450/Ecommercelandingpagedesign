@@ -7,7 +7,7 @@ namespace Furniture_E_Commerce.DTOs.Products
 {
     public class ProductDetailsDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
 

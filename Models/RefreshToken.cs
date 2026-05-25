@@ -39,7 +39,7 @@ public class RefreshToken
 
     // ── Foreign key ────────────────────────────────────────────────────────
     [Required]
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     // ── Navigation property ────────────────────────────────────────────────
     [ForeignKey(nameof(UserId))]

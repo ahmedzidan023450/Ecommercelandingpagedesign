@@ -8,10 +8,10 @@ namespace Furniture_E_Commerce.Models;
 public class Cart
 {
     [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public int Id { get; set; }
 
     [Required]
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

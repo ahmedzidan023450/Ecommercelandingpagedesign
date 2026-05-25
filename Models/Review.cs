@@ -34,10 +34,10 @@ public class Review
 
     // ── Foreign keys ───────────────────────────────────────────────────────
     [Required]
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     [Required]
-    public Guid ProductId { get; set; }
+    public int ProductId { get; set; }
 
     // ── Navigation properties ──────────────────────────────────────────────
     [ForeignKey(nameof(UserId))]

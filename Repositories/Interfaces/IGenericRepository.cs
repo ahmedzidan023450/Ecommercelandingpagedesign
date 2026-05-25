@@ -1,28 +1,40 @@
 ﻿using System.Linq.Expressions;
 
-namespace Furniture_E_Commerce.Repositories.Interfaces;
-
-/// <summary>
-/// Generic repository contract — provides basic CRUD operations.
-/// All domain-specific repositories extend this.
-/// </summary>
-public interface IGenericRepository<T> where T : class
+namespace Furniture_E_Commerce.Repositories.Interfaces
 {
-    // ── Queries ────────────────────────────────────────────────────────────
-    Task<T?> GetByIdAsync(Guid id);
-    Task<IEnumerable<T>> GetAllAsync();
-    Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
-    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
-    Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
-    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
+    public interface IGenericRepository<T> where T : class
+    {
+        // =========================
+        // QUERIES
+        // =========================
 
-    // ── Commands ───────────────────────────────────────────────────────────
-    Task<T> AddAsync(T entity);
-    Task AddRangeAsync(IEnumerable<T> entities);
-    void Update(T entity);
-    void Delete(T entity);
-    void DeleteRange(IEnumerable<T> entities);
+        IQueryable<T> Query();
 
-    // ── Persistence ────────────────────────────────────────────────────────
-    Task<int> SaveChangesAsync();
+        Task<T?> GetByIdAsync(object id);
+
+        Task<T?> FirstOrDefaultAsync(
+            Expression<Func<T, bool>> predicate);
+
+        Task<bool> ExistsAsync(
+            Expression<Func<T, bool>> predicate);
+
+        Task<int> CountAsync(
+            Expression<Func<T, bool>>? predicate = null);
+
+        // =========================
+        // COMMANDS
+        // =========================
+
+        Task<T> AddAsync(T entity);
+
+        void Update(T entity);
+
+        void Delete(T entity);
+
+        // =========================
+        // SAVE
+        // =========================
+
+        Task<int> SaveChangesAsync();
+    }
 }

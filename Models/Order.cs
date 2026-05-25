@@ -8,7 +8,7 @@ namespace Furniture_E_Commerce.Models;
 public class Order
 {
     [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public int Id { get; set; }
 
     /// <summary>
     /// Human-readable unique order reference. e.g. FSH-20240601-0042
@@ -55,7 +55,7 @@ public class Order
 
     // ── Foreign key ────────────────────────────────────────────────────────
     [Required]
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     // ── Navigation properties ──────────────────────────────────────────────
     [ForeignKey(nameof(UserId))]

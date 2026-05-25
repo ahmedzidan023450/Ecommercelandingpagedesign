@@ -7,168 +7,109 @@ namespace Furniture_E_Commerce.Repositories.Implementations
 {
     public class ProductRepository : GenericRepository<Product>, IProductRepository
     {
-        private readonly ApplicationDbContext _context;
+        public ProductRepository(ApplicationDbContext context) : base(context) { }
 
-        public ProductRepository(ApplicationDbContext context)
-            : base(context)
-        {
-            _context = context;
-        }
+        public IQueryable<Product> Query() => _context.Set<Product>();
 
         public async Task<Product?> GetBySlugAsync(string slug)
         {
             return await _context.Products
-                .FirstOrDefaultAsync(p => p.Slug == slug);
+                .FirstOrDefaultAsync(x => x.Slug == slug);
         }
 
-        public async Task<Product?> GetWithDetailsAsync(Guid id)
+        public async Task<Product?> GetWithDetailsAsync(int id)
         {
             return await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Discount)
-                .Include(p => p.Images)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Include(x => x.Images)
+                .Include(x => x.Category)
+                .Include(x => x.Discount)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Product?> GetWithReviewsAsync(Guid id)
+        public async Task<Product?> GetWithReviewsAsync(int id)
         {
             return await _context.Products
-                .Include(p => p.Reviews)
-                    .ThenInclude(r => r.User)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Include(x => x.Reviews)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<(IEnumerable<Product> Items, int TotalCount)>
-            GetPagedAsync(
-                int page,
-                int pageSize,
-                string? search = null,
-                int? categoryId = null,
-                decimal? minPrice = null,
-                decimal? maxPrice = null,
-                string? sortBy = null,
-                bool sortDesc = false)
+        public async Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(
+            int page,
+            int pageSize,
+            string? search = null,
+            int? categoryId = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? sortBy = null,
+            bool sortDesc = false)
         {
-            var query = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Images)
-                .AsQueryable();
+            var query = _context.Products.AsNoTracking();
 
-            // Search
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(p =>
-                    p.Name.Contains(search) ||
-                    p.Description.Contains(search));
-            }
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(x => x.Name.Contains(search));
 
-            // Category
             if (categoryId.HasValue)
-            {
-                query = query.Where(p =>
-                    p.CategoryId == categoryId.Value);
-            }
+                query = query.Where(x => x.CategoryId == categoryId);
 
-            // Price Range
             if (minPrice.HasValue)
-            {
-                query = query.Where(p =>
-                    p.Price >= minPrice.Value);
-            }
+                query = query.Where(x => x.Price >= minPrice);
 
             if (maxPrice.HasValue)
-            {
-                query = query.Where(p =>
-                    p.Price <= maxPrice.Value);
-            }
+                query = query.Where(x => x.Price <= maxPrice);
 
-            // Sorting
-            query = sortBy?.ToLower() switch
-            {
-                "price" => sortDesc
-                    ? query.OrderByDescending(p => p.Price)
-                    : query.OrderBy(p => p.Price),
-
-                "name" => sortDesc
-                    ? query.OrderByDescending(p => p.Name)
-                    : query.OrderBy(p => p.Name),
-
-                "rating" => sortDesc
-                    ? query.OrderByDescending(p => p.AverageRating)
-                    : query.OrderBy(p => p.AverageRating),
-
-                _ => query.OrderByDescending(p => p.CreatedAt)
-            };
-
-            var totalCount = await query.CountAsync();
+            var total = await query.CountAsync();
 
             var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (items, totalCount);
+            return (items, total);
         }
 
         public async Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId)
         {
             return await _context.Products
-                .Where(p => p.CategoryId == categoryId)
-                .Include(p => p.Images)
+                .Where(x => x.CategoryId == categoryId)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Product>> GetLowStockAsync(int threshold = 10)
         {
             return await _context.Products
-                .Where(p => p.StockQuantity <= threshold)
-                .OrderBy(p => p.StockQuantity)
+                .Where(x => x.StockQuantity <= threshold)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Product>> GetTopSellingAsync(int count = 10)
         {
             return await _context.Products
-                .OrderByDescending(p =>
-                    p.OrderItems.Sum(oi => oi.Quantity))
+                .OrderByDescending(x => x.SoldCount)
                 .Take(count)
-                .Include(p => p.Images)
                 .ToListAsync();
         }
 
-        public async Task<bool> SlugExistsAsync(
-            string slug,
-            Guid? excludeId = null)
+        public async Task<bool> SlugExistsAsync(string slug, int? excludeId = null)
         {
-            return await _context.Products.AnyAsync(p =>
-                p.Slug == slug &&
-                (!excludeId.HasValue || p.Id != excludeId.Value));
+            return await _context.Products.AnyAsync(x =>
+                x.Slug == slug && (!excludeId.HasValue || x.Id != excludeId));
         }
 
-        public async Task UpdateStockAsync(Guid productId, int delta)
+        public async Task UpdateStockAsync(int productId, int delta)
         {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.Id == productId);
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null) return;
 
-            if (product != null)
-            {
-                product.StockQuantity += delta;
-            }
+            product.StockQuantity += delta;
         }
 
-        public async Task UpdateRatingAsync(
-            Guid productId,
-            decimal avgRating,
-            int reviewCount)
+        public async Task UpdateRatingAsync(int productId, decimal avgRating, int reviewCount)
         {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.Id == productId);
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null) return;
 
-            if (product != null)
-            {
-                product.AverageRating = avgRating;
-                product.ReviewCount = reviewCount;
-            }
+            product.AverageRating = avgRating;
+            product.ReviewCount = reviewCount;
         }
     }
 }

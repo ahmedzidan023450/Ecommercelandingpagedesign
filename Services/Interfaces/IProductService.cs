@@ -13,14 +13,14 @@ namespace Furniture_E_Commerce.Services.Interfaces
     {
         Task<Product> CreateAsync(CreateProductDto dto, List<IFormFile> images);
 
-        Task<Product?> UpdateAsync(Guid id, UpdateProductDto dto);
+        Task<Product?> UpdateAsync(int id, UpdateProductDto dto);
 
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
 
-        Task<ProductDetailsDto?> GetDetailsAsync(Guid id);
+        Task<ProductDetailsDto?> GetDetailsAsync(int id);
 
         Task<PagedResultDto<ProductCardDto>> GetPagedAsync(ProductQueryDto query);
 
-        Task UpdateStockAsync(Guid productId, int quantity);
+        Task UpdateStockAsync(int productId, int quantity);
     }
 }

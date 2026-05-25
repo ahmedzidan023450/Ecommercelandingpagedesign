@@ -23,4 +23,3 @@ namespace Furniture_E_Commerce.Validators.Discounts
         }
     }
 }
-}

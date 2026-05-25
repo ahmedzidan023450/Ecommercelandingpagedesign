@@ -33,7 +33,7 @@ public class ProductImage
 
     // ── Foreign key ────────────────────────────────────────────────────────
     [Required]
-    public Guid ProductId { get; set; }
+    public int ProductId { get; set; }
 
     // ── Navigation property ────────────────────────────────────────────────
     [ForeignKey(nameof(ProductId))]

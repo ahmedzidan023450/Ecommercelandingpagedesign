@@ -6,7 +6,7 @@ namespace Furniture_E_Commerce.DTOs.Financial
 {
     public class FinancialRecordDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         public string Type { get; set; } = string.Empty;
 
