@@ -119,9 +119,9 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
                             AddRow(table, "إجمالي المستخدمين", stats.TotalUsers.ToString());
                             AddRow(table, "إجمالي الطلبات", stats.TotalOrders.ToString());
                             AddRow(table, "إجمالي المنتجات", stats.TotalProducts.ToString());
-                            AddRow(table, "إجمالي الإيرادات", $"{stats.TotalRevenue:N2} جنيه");
-                            AddRow(table, "إجمالي المصروفات", $"{stats.TotalExpenses:N2} جنيه");
-                            AddRow(table, "صافي الربح", $"{stats.NetProfit:N2} جنيه");
+                            AddRow(table, "إجمالي الإيرادات", $"{stats.TotalRevenue:N2} ريال");
+                            AddRow(table, "إجمالي المصروفات", $"{stats.TotalExpenses:N2} ريال");
+                            AddRow(table, "صافي الربح", $"{stats.NetProfit:N2} ريال");
                         });
 
                         // Monthly Revenue
@@ -147,7 +147,7 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
                             {
                                 table.Cell().Element(CellStyleBody).Text(item.MonthName);
                                 table.Cell().Element(CellStyleBody)
-                                    .Text($"{item.Revenue:N2} جنيه");
+                                    .Text($"{item.Revenue:N2} ريال");
                             }
                         });
                     });
