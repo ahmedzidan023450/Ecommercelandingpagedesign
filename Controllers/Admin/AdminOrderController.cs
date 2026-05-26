@@ -1,4 +1,5 @@
-﻿using Furniture_E_Commerce.Models.Enums;
+﻿using Furniture_E_Commerce.DTOs.Orders;
+using Furniture_E_Commerce.Models.Enums;
 using Furniture_E_Commerce.Services.Interfaces.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,8 +24,15 @@ namespace Furniture_E_Commerce.Controllers.Admin
             int pageSize = 10,
             OrderStatus? status = null)
         {
-            var result = await _adminService.GetOrdersPagedAsync(page, pageSize, status);
-            return Ok(result);
+            var (items, totalCount) = await _adminService.GetOrdersPagedAsync(page, pageSize, status);
+            return Ok(new
+            {
+                items,
+                totalCount,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            });
         }
 
         [HttpGet("{id:int}")]
@@ -34,11 +42,12 @@ namespace Furniture_E_Commerce.Controllers.Admin
             return result == null ? NotFound() : Ok(result);
         }
 
-        [HttpPut("{id:int}/status")]
-        public async Task<IActionResult> UpdateStatus(int id, OrderStatus status)
+        // keep only PATCH, remove the duplicate HttpPut
+        [HttpPatch("{id:int}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateOrderStatusDto dto)
         {
-            await _adminService.UpdateOrderStatusAsync(id, status);
-            return Ok();
+            await _adminService.UpdateOrderStatusAsync(id, dto.Status);
+            return NoContent();
         }
     }
 }

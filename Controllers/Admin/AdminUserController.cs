@@ -18,13 +18,20 @@ namespace Furniture_E_Commerce.Controllers.Admin
 
         [HttpGet]
         public async Task<IActionResult> GetUsers(
-            int page = 1,
-            int pageSize = 10,
-            string? search = null,
-            bool? isBlocked = null)
+    int page = 1,
+    int pageSize = 10,
+    string? search = null,
+    bool? isBlocked = null)
         {
-            var result = await _adminService.GetUsersPagedAsync(page, pageSize, search, isBlocked);
-            return Ok(result);
+            var (items, totalCount) = await _adminService.GetUsersPagedAsync(page, pageSize, search, isBlocked);
+            return Ok(new
+            {
+                items,
+                totalCount,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            });
         }
 
         [HttpGet("{id:int}")]

@@ -18,8 +18,6 @@ namespace Furniture_E_Commerce.DTOs.Users
 
         public bool IsBlocked { get; set; }
 
-        public bool EmailConfirmed { get; set; }
-
         public DateTime CreatedAt { get; set; }
 
         public int TotalOrders { get; set; }

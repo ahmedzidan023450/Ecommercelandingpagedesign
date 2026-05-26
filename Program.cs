@@ -37,6 +37,7 @@ namespace Furniture_E_Commerce
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<ValidationFilter>();
+                options.Filters.AddService<BlockedUserFilter>();
             });
             builder.Services.AddRepositories();
             builder.Services.AddServices();

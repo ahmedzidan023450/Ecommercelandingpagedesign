@@ -7,5 +7,6 @@ namespace Furniture_E_Commerce.Services.Interfaces.Admin
     {
         Task<DashboardStatsDto> GetDashboardStatsAsync();
         Task<IEnumerable<MonthlyRevenueDto>> GetMonthlyRevenueAsync(int months = 12);
+        Task<byte[]> ExportDashboardPdfAsync();
     }
 }

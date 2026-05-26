@@ -11,29 +11,56 @@ namespace Furniture_E_Commerce.Controllers.Admin
     {
         private readonly IAdminDashboardService _dashboardService;
 
-        public AdminDashboardController(IAdminDashboardService dashboardService)
+        public AdminDashboardController(
+            IAdminDashboardService dashboardService)
         {
             _dashboardService = dashboardService;
         }
 
-        // =========================
-        // MAIN STATS
-        // =========================
+        // =========================================
+        // DASHBOARD STATS
+        // =========================================
+
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {
-            var result = await _dashboardService.GetDashboardStatsAsync();
+            var result =
+                await _dashboardService
+                    .GetDashboardStatsAsync();
+
             return Ok(result);
         }
 
-        // =========================
-        // CHART DATA (Revenue trend)
-        // =========================
+        // =========================================
+        // MONTHLY REVENUE
+        // =========================================
+
         [HttpGet("revenue")]
-        public async Task<IActionResult> GetMonthlyRevenue([FromQuery] int months = 12)
+        public async Task<IActionResult> GetMonthlyRevenue(
+            [FromQuery] int months = 12)
         {
-            var result = await _dashboardService.GetMonthlyRevenueAsync(months);
+            var result =
+                await _dashboardService
+                    .GetMonthlyRevenueAsync(months);
+
             return Ok(result);
+        }
+
+        // =========================================
+        // EXPORT PDF REPORT
+        // =========================================
+
+        [HttpGet("export/pdf")]
+        public async Task<IActionResult> ExportDashboardPdf()
+        {
+            var pdfBytes =
+                await _dashboardService
+                    .ExportDashboardPdfAsync();
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                $"dashboard-report-{DateTime.Now:yyyyMMddHHmmss}.pdf");
         }
     }
 }

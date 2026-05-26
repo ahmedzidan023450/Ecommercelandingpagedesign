@@ -40,7 +40,19 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
         public async Task<UserDetailsDto?> GetUserDetailsAsync(int userId)
         {
             var user = await _userRepo.GetWithOrdersAsync(userId);
-            return user == null ? null : user.Adapt<UserDetailsDto>();
+            if (user == null) return null;
+
+            var dto = user.Adapt<UserDetailsDto>();
+
+            dto.TotalOrders = user.Orders.Count;
+            dto.TotalSpent = user.Orders.Sum(o => o.TotalAmount);
+            dto.TotalReviews = user.Reviews.Count;
+            dto.RecentOrders = user.Orders
+                .OrderByDescending(o => o.PlacedAt)
+                .Take(5)
+                .Adapt<List<UserOrderSummaryDto>>();
+
+            return dto;
         }
 
         public async Task BlockUserAsync(int userId)

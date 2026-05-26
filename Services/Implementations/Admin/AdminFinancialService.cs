@@ -1,4 +1,5 @@
 ﻿using Furniture_E_Commerce.DTOs.Financial;
+using Furniture_E_Commerce.Models;
 using Furniture_E_Commerce.Models.Enums;
 using Furniture_E_Commerce.Repositories.Interfaces;
 using Furniture_E_Commerce.Services.Interfaces.Admin;
@@ -16,7 +17,8 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
             _financialRepo = financialRepo;
         }
 
-        public async Task<IEnumerable<FinancialRecordDto>> GetFinancialRecordsAsync(int month, int year)
+        public async Task<IEnumerable<FinancialRecordDto>> GetFinancialRecordsAsync(
+            int month, int year)
         {
             var data = await _financialRepo.GetByMonthYearAsync(month, year);
             return data.Adapt<IEnumerable<FinancialRecordDto>>();
@@ -24,16 +26,35 @@ namespace Furniture_E_Commerce.Services.Implementations.Admin
 
         public async Task<decimal> GetTotalRevenueAsync()
         {
-            return await _financialRepo.Query().AsNoTracking()
+            return await _financialRepo.Query()
+                .AsNoTracking()
                 .Where(f => f.Type == FinancialRecordType.Revenue)
                 .SumAsync(f => f.Amount);
         }
 
         public async Task<decimal> GetTotalExpensesAsync()
         {
-            return await _financialRepo.Query().AsNoTracking()
+            return await _financialRepo.Query()
+                .AsNoTracking()
                 .Where(f => f.Type == FinancialRecordType.Expense)
                 .SumAsync(f => f.Amount);
+        }
+
+        public async Task AddExpenseAsync(CreateFinancialRecordDto dto, string adminId)
+        {
+            var record = new FinancialRecord
+            {
+                Type = FinancialRecordType.Expense,
+                Amount = dto.Amount,
+                Description = dto.Description,
+                Month = dto.Month,
+                Year = dto.Year,
+                RecordedBy = adminId,
+                RecordedAt = DateTime.UtcNow
+            };
+
+            await _financialRepo.AddAsync(record);
+            await _financialRepo.SaveChangesAsync();
         }
     }
 }

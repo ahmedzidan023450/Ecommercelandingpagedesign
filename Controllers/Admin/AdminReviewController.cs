@@ -17,15 +17,20 @@ namespace Furniture_E_Commerce.Controllers.Admin
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetReviews(
-            int page = 1,
-            int pageSize = 10,
-            bool? isHidden = null)
+        [HttpGet]
+        public async Task<IActionResult> GetReviews(int page = 1,int pageSize = 10,bool? isHidden = null)
         {
-            var result = await _adminService
+            var (items, totalCount) = await _adminService
                 .GetReviewsPagedAsync(page, pageSize, isHidden);
 
-            return Ok(result);
+            return Ok(new
+            {
+                items,
+                totalCount,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            });
         }
 
         [HttpPatch("{id:int}/hide")]

@@ -1,4 +1,5 @@
-﻿using Furniture_E_Commerce.Models;
+﻿using Furniture_E_Commerce.Filters;
+using Furniture_E_Commerce.Models;
 using Furniture_E_Commerce.Repositories.Implementations;
 using Furniture_E_Commerce.Repositories.Interfaces;
 using Furniture_E_Commerce.Services.Implementations;
@@ -31,6 +32,7 @@ namespace Furniture_E_Commerce
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<BlockedUserFilter>();
             return services;
         }
         public static IServiceCollection AddServices(this IServiceCollection services)

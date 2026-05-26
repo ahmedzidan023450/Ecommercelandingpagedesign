@@ -14,17 +14,20 @@ namespace Furniture_E_Commerce.Services.Implementations
         private readonly IOrderRepository _orderRepo;
         private readonly IProductRepository _productRepo;
         private readonly IDiscountRepository _discountRepo;
+        private readonly IFinancialRecordRepository _financialRepo; // ← new
 
         public OrderService(
             ICartRepository cartRepo,
             IOrderRepository orderRepo,
             IProductRepository productRepo,
-            IDiscountRepository discountRepo)
+            IDiscountRepository discountRepo,
+            IFinancialRecordRepository financialRepo) // ← new
         {
             _cartRepo = cartRepo;
             _orderRepo = orderRepo;
             _productRepo = productRepo;
             _discountRepo = discountRepo;
+            _financialRepo = financialRepo; // ← new
         }
 
         // =========================
@@ -57,20 +60,20 @@ namespace Furniture_E_Commerce.Services.Implementations
                 if (product == null)
                     throw new Exception("Product not found");
 
-                var itemTotal = product.Price * item.Quantity;
+                var finalPrice = item.Product.DiscountedPrice ?? item.Product.Price;
+                var itemTotal = finalPrice * item.Quantity;
 
                 order.Items.Add(new OrderItem
                 {
                     ProductId = product.Id,
                     ProductName = product.Name,
-                    UnitPrice = product.Price,
+                    UnitPrice = finalPrice,
                     Quantity = item.Quantity,
                     TotalPrice = itemTotal
                 });
 
                 total += itemTotal;
 
-                // reduce stock
                 product.StockQuantity -= item.Quantity;
                 _productRepo.Update(product);
             }
@@ -80,7 +83,6 @@ namespace Furniture_E_Commerce.Services.Implementations
             await _orderRepo.AddAsync(order);
             await _orderRepo.SaveChangesAsync();
 
-            // clear cart after order
             await _cartRepo.ClearCartAsync(userId);
 
             var created = await _orderRepo.GetWithDetailsAsync(order.Id);
@@ -128,8 +130,49 @@ namespace Furniture_E_Commerce.Services.Implementations
                 throw new Exception("Only pending orders can be cancelled");
 
             order.Status = OrderStatus.Cancelled;
+            order.UpdatedAt = DateTime.UtcNow;
 
             _orderRepo.Update(order);
+            await _orderRepo.SaveChangesAsync();
+        }
+
+        // =========================
+        // UPDATE ORDER STATUS (ADMIN)
+        // =========================
+        public async Task UpdateOrderStatusAsync(int orderId, OrderStatus newStatus)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+
+            if (order == null)
+                throw new Exception("Order not found");
+
+            // prevent recording revenue twice
+            if (order.Status == OrderStatus.Delivered)
+                throw new Exception("Order is already delivered");
+
+            order.Status = newStatus;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            _orderRepo.Update(order);
+
+            // auto-record revenue when order is delivered
+            if (newStatus == OrderStatus.Delivered)
+            {
+                var record = new FinancialRecord
+                {
+                    Type = FinancialRecordType.Revenue,
+                    Amount = order.TotalAmount,
+                    Description = $"Order #{order.OrderNumber} delivered",
+                    Month = DateTime.UtcNow.Month,
+                    Year = DateTime.UtcNow.Year,
+                    RecordedBy = "System",
+                    OrderId = order.Id,
+                    RecordedAt = DateTime.UtcNow
+                };
+
+                await _financialRepo.AddAsync(record);
+            }
+
             await _orderRepo.SaveChangesAsync();
         }
     }

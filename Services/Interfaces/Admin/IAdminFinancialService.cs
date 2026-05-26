@@ -7,5 +7,6 @@ namespace Furniture_E_Commerce.Services.Interfaces.Admin
         Task<IEnumerable<FinancialRecordDto>> GetFinancialRecordsAsync(int month, int year);
         Task<decimal> GetTotalRevenueAsync();
         Task<decimal> GetTotalExpensesAsync();
+        Task AddExpenseAsync(CreateFinancialRecordDto dto, string adminId);
     }
 }

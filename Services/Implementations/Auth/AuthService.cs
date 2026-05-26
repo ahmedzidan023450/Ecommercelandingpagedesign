@@ -32,6 +32,7 @@ namespace Furniture_E_Commerce.Services.Implementations.Auth
             {
                 FullName = dto.FullName,
                 Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
                 CreatedAt = DateTime.UtcNow,
                 Role = UserRole.Customer
             };
