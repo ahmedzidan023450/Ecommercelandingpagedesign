@@ -17,18 +17,7 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             return await _context.Users
                 .FirstOrDefaultAsync(x => x.Email == email);
         }
-
-        public async Task<User?> GetByEmailVerificationTokenAsync(string token)
-        {
-            return await _context.Users
-                .FirstOrDefaultAsync(x => x.EmailVerificationToken == token);
-        }
-
-        public async Task<User?> GetByPasswordResetTokenAsync(string tokenHash)
-        {
-            return await _context.Users
-                .FirstOrDefaultAsync(x => x.PasswordResetToken == tokenHash);
-        }
+        
 
         public async Task<User?> GetWithOrdersAsync(int userId)
         {

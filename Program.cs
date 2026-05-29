@@ -3,8 +3,6 @@ using FluentValidation.AspNetCore;
 using Furniture_E_Commerce.Data;
 using Furniture_E_Commerce.Filters;
 using Furniture_E_Commerce.Mappings;
-using Furniture_E_Commerce.Services.Implementations;
-using Furniture_E_Commerce.Services.Interfaces;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;

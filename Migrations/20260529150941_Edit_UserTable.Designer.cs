@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Furniture_E_Commerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260525230058_Init")]
-    partial class Init
+    [Migration("20260529150941_Edit_UserTable")]
+    partial class Edit_UserTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -575,10 +575,6 @@ namespace Furniture_E_Commerce.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("EmailVerificationToken")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -587,18 +583,8 @@ namespace Furniture_E_Commerce.Migrations
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("bit");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("PasswordResetExpiry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PasswordResetToken")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 

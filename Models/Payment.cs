@@ -38,7 +38,6 @@ public class Payment
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // ── Foreign key (1:1 with Order) ──────────────────────────────────────
     [Required]
     public int OrderId { get; set; }
 

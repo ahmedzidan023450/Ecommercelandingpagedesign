@@ -34,18 +34,8 @@ public class User
     [Required]
     [MaxLength(20)]
     public UserRole Role { get; set; } = UserRole.Customer;  // "Admin" | "Customer"
-
-    public bool IsEmailVerified { get; set; } = false;
-
+    
     public bool IsBlocked { get; set; } = false;
-
-    [MaxLength(255)]
-    public string? EmailVerificationToken { get; set; }
-
-    [MaxLength(255)]
-    public string? PasswordResetToken { get; set; }
-
-    public DateTime? PasswordResetExpiry { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
