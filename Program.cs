@@ -27,7 +27,7 @@ namespace Furniture_E_Commerce
 
             
             MapsterConfig.Register();
-
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
             builder.Services.AddMapster();
 
@@ -138,14 +138,11 @@ namespace Furniture_E_Commerce
             }
 
             app.UseHttpsRedirection();
-
-            app.UseCors("AllowAll");
-
+            app.UseStaticFiles(); 
+            app.UseCors("AllowAll");            
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseStaticFiles(); 
-
+            
             app.MapControllers();
 
             app.Run();

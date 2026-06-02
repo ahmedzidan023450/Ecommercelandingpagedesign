@@ -61,18 +61,7 @@ public class Product
 
     public bool IsActive { get; set; } = true;
 
-    // =========================
-    // PRODUCT DETAILS
-    // =========================
 
-    [MaxLength(100)]
-    public string? Material { get; set; }
-
-    [MaxLength(80)]
-    public string? Color { get; set; }
-
-    [MaxLength(100)]
-    public string? Dimensions { get; set; }
 
     // =========================
     // REVIEW STATS (CACHED)

@@ -12,12 +12,16 @@ namespace Furniture_E_Commerce.Services.Implementations
         private readonly IProductRepository _productRepo;
         private readonly IDiscountRepository _discountRepo;
 
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         public ProductService(
             IProductRepository productRepo,
-            IDiscountRepository discountRepo)
+            IDiscountRepository discountRepo,
+            IHttpContextAccessor httpContextAccessor)
         {
             _productRepo = productRepo;
             _discountRepo = discountRepo;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<(IEnumerable<ProductCardDto> Items, int TotalCount)>
@@ -123,35 +127,76 @@ namespace Furniture_E_Commerce.Services.Implementations
             }
         }
 
-        private async Task SaveImagesAsync(int productId, IList<IFormFile> files, int startOrder)
+        private async Task SaveImagesAsync(
+            int productId,
+            IList<IFormFile> files,
+            int startOrder)
         {
             var imageEntities = new List<ProductImage>();
             int order = startOrder;
 
             var folderPath = Path.Combine(
-                Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "images",
+                "products");
+
             Directory.CreateDirectory(folderPath);
+
+            var request = _httpContextAccessor.HttpContext?.Request;
 
             foreach (var file in files)
             {
-                if (file.Length == 0) continue;
+                if (file == null || file.Length == 0)
+                    continue;
 
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                // max 5 MB
+                if (file.Length > 5 * 1024 * 1024)
+                    throw new Exception("Image size cannot exceed 5MB");
 
-                using var stream = new FileStream(Path.Combine(folderPath, fileName), FileMode.Create);
+                var allowedExtensions = new[]
+                {
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp"
+                };
+
+                var extension =
+                    Path.GetExtension(file.FileName)
+                        .ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(extension))
+                    throw new Exception("Invalid image format");
+
+                var fileName =
+                    $"{Guid.NewGuid():N}{extension}";
+
+                var filePath =
+                    Path.Combine(folderPath, fileName);
+
+                await using var stream =
+                    new FileStream(filePath, FileMode.Create);
+
                 await file.CopyToAsync(stream);
+
+                var imageUrl =
+                    $"{request?.Scheme}://{request?.Host}/images/products/{fileName}";
 
                 imageEntities.Add(new ProductImage
                 {
                     ProductId = productId,
-                    Url = $"/images/products/{fileName}",
+                    Url = imageUrl,
                     IsPrimary = order == 0,
                     DisplayOrder = order++
                 });
             }
 
-            await _productRepo.AddImagesAsync(imageEntities);
-            await _productRepo.SaveChangesAsync();
+            if (imageEntities.Any())
+            {
+                await _productRepo.AddImagesAsync(imageEntities);
+                await _productRepo.SaveChangesAsync();
+            }
         }
     }
 }

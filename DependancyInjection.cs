@@ -16,8 +16,8 @@ namespace Furniture_E_Commerce
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddRepositories(this IServiceCollection services)
-        {
+        public static IServiceCollection AddRepositories(this IServiceCollection services) 
+        { 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
@@ -30,14 +30,14 @@ namespace Furniture_E_Commerce
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-            services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<BlockedUserFilter>();
+            services.AddScoped<ValidationFilter>();
+
             return services;
         }
-        public static IServiceCollection AddServices(this IServiceCollection services)
+        public static IServiceCollection AddServices(this IServiceCollection services) 
         {
-
             services.AddScoped<IAdminDashboardService, AdminDashboardService>();
             services.AddScoped<IAdminUserService, AdminUserService>();
             services.AddScoped<IAdminOrderService, AdminOrderService>();
@@ -45,8 +45,10 @@ namespace Furniture_E_Commerce
             services.AddScoped<IAdminFinancialService, AdminFinancialService>();
             services.AddScoped<IAdminDiscountService, AdminDiscountService>();
             services.AddScoped<IAdminCategoryService, AdminCategoryService>();
+
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<ICategoryService, CategoryService>();
@@ -55,7 +57,9 @@ namespace Furniture_E_Commerce
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IReviewService, ReviewService>();
+
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
             return services;
         }
     }
