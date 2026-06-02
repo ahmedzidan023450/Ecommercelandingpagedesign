@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Furniture_E_Commerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260529150941_Edit_UserTable")]
-    partial class Edit_UserTable
+    [Migration("20260602173159_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -369,10 +369,6 @@ namespace Furniture_E_Commerce.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Color")
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -380,10 +376,6 @@ namespace Furniture_E_Commerce.Migrations
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Dimensions")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("DiscountId")
                         .HasColumnType("int");
@@ -393,10 +385,6 @@ namespace Furniture_E_Commerce.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Material")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()

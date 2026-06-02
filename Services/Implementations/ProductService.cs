@@ -147,41 +147,28 @@ namespace Furniture_E_Commerce.Services.Implementations
 
             foreach (var file in files)
             {
-                if (file == null || file.Length == 0)
+                if (file.Length == 0)
                     continue;
 
-                // max 5 MB
-                if (file.Length > 5 * 1024 * 1024)
-                    throw new Exception("Image size cannot exceed 5MB");
+                var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
 
-                var allowedExtensions = new[]
-                {
-                    ".jpg",
-                    ".jpeg",
-                    ".png",
-                    ".webp"
-                };
+                var ext = Path.GetExtension(file.FileName).ToLower();
 
-                var extension =
-                    Path.GetExtension(file.FileName)
-                        .ToLowerInvariant();
-
-                if (!allowedExtensions.Contains(extension))
+                if (!allowed.Contains(ext))
                     throw new Exception("Invalid image format");
 
-                var fileName =
-                    $"{Guid.NewGuid():N}{extension}";
+                var fileName = $"{Guid.NewGuid()}{ext}";
 
-                var filePath =
-                    Path.Combine(folderPath, fileName);
+                var fullPath = Path.Combine(folderPath, fileName);
 
-                await using var stream =
-                    new FileStream(filePath, FileMode.Create);
+                using var stream = new FileStream(fullPath, FileMode.Create);
 
                 await file.CopyToAsync(stream);
 
                 var imageUrl =
-                    $"{request?.Scheme}://{request?.Host}/images/products/{fileName}";
+                    $"{_httpContextAccessor.HttpContext!.Request.Scheme}://" +
+                    $"{_httpContextAccessor.HttpContext!.Request.Host}" +
+                    $"/images/products/{fileName}";
 
                 imageEntities.Add(new ProductImage
                 {
@@ -190,12 +177,6 @@ namespace Furniture_E_Commerce.Services.Implementations
                     IsPrimary = order == 0,
                     DisplayOrder = order++
                 });
-            }
-
-            if (imageEntities.Any())
-            {
-                await _productRepo.AddImagesAsync(imageEntities);
-                await _productRepo.SaveChangesAsync();
             }
         }
     }
