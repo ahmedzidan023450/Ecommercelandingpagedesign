@@ -31,6 +31,10 @@ namespace Furniture_E_Commerce.Repositories.Implementations
         {
             return await _context.Orders
                 .Where(x => x.UserId == userId)
+                .Include(x => x.User)
+                .Include(x => x.Items)
+                .ThenInclude(i => i.Product)
+                .OrderByDescending(x => x.PlacedAt)
                 .ToListAsync();
         }
 

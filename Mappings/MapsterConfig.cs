@@ -116,13 +116,30 @@ namespace Furniture_E_Commerce.Mappings
 
             TypeAdapterConfig<Order, OrderListDto>
                 .NewConfig()
-                .Map(dest => dest.CustomerName, src => src.User.FullName)
-                .Map(dest => dest.ItemsCount, src => src.Items.Count);
+                .Map(dest => dest.CustomerName,
+                    src => src.User.FullName)
+                .Map(dest => dest.ItemsCount,
+                    src => src.Items.Count)
+                .Map(dest => dest.RecipientName,
+                    src => src.RecipientName)
+                .Map(dest => dest.PhoneNumber,
+                    src => src.PhoneNumber)
+                .Map(dest => dest.ShippingAddress,
+                    src => src.ShippingAddress);
 
             TypeAdapterConfig<Order, OrderDetailsDto>
                 .NewConfig()
-                .Map(dest => dest.Items, src => src.Items);
-
+                .Map(dest => dest.Items,
+                    src => src.Items)
+                .Map(dest => dest.RecipientName,
+                    src => src.RecipientName)
+                .Map(dest => dest.PhoneNumber,
+                    src => src.PhoneNumber)
+                .Map(dest => dest.Notes,
+                    src => src.Notes)
+                .Map(dest => dest.ShippingAddress,
+                    src => src.ShippingAddress);
+            
             TypeAdapterConfig<OrderItem, OrderItemDto>
                 .NewConfig()
                 .Map(dest => dest.Total, src => src.TotalPrice);

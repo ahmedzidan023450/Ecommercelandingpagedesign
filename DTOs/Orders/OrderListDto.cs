@@ -20,5 +20,8 @@ namespace Furniture_E_Commerce.DTOs.Orders
         public string CustomerName { get; set; } = string.Empty;
 
         public int ItemsCount { get; set; }
+        public string RecipientName {get; set;} = string.Empty;
+        public string PhoneNumber {get; set;} = string.Empty;
+        public string ShippingAddress {get; set;} = string.Empty;
     }
 }

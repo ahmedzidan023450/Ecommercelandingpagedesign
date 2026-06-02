@@ -107,11 +107,16 @@ namespace Furniture_E_Commerce.Services.Implementations
         // =========================
         // GET SINGLE ORDER
         // =========================
-        public async Task<OrderDetailsDto?> GetOrderAsync(int userId, int orderId)
+        public async Task<OrderDetailsDto?> GetOrderAsync(
+            int userId,
+            int orderId)
         {
             var order = await _orderRepo.Query()
                 .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o =>
+                    o.Id == orderId &&
+                    o.UserId == userId);
 
             return order?.Adapt<OrderDetailsDto>();
         }

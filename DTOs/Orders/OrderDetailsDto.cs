@@ -15,9 +15,10 @@ namespace Furniture_E_Commerce.DTOs.Orders
         public string Status { get; set; } = string.Empty;
 
         public string ShippingAddress { get; set; } = string.Empty;
-
+        public string RecipientName {get; set;} = string.Empty;
+        public string PhoneNumber {get; set;} = string.Empty;
+        public string? Notes {get; set;}
         public DateTime PlacedAt { get; set; }
-
         public List<OrderItemDto> Items { get; set; } = new();
     }
 }
