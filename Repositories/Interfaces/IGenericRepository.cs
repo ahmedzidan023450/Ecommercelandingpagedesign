@@ -24,6 +24,7 @@ namespace Furniture_E_Commerce.Repositories.Interfaces
         // =========================
         // COMMANDS
         // =========================
+        Task AddRangeAsync(IEnumerable<T> entities);
 
         Task<T> AddAsync(T entity);
 

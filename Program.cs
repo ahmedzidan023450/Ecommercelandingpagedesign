@@ -19,24 +19,26 @@ namespace Furniture_E_Commerce
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
 
-            
-            MapsterConfig.Register();
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+            // ── Mapster ──────────────────────────────────────────
+            var mapsterConfig = new TypeAdapterConfig();
+            MapsterConfig.Register(mapsterConfig);
+            builder.Services.AddSingleton(mapsterConfig);
             builder.Services.AddMapster();
+            // ─────────────────────────────────────────────────────
 
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<ValidationFilter>();
                 options.Filters.AddService<BlockedUserFilter>();
             });
+
             builder.Services.AddRepositories();
             builder.Services.AddServices();
 
@@ -62,7 +64,6 @@ namespace Furniture_E_Commerce
                 };
             });
 
-
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -82,7 +83,6 @@ namespace Furniture_E_Commerce
 
             builder.Services.AddAuthorization();
 
-            
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddSwaggerGen(options =>
@@ -119,7 +119,6 @@ namespace Furniture_E_Commerce
                 });
             });
 
-            
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -132,8 +131,6 @@ namespace Furniture_E_Commerce
 
             var app = builder.Build();
 
-
-            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -141,11 +138,11 @@ namespace Furniture_E_Commerce
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles(); 
-            app.UseCors("AllowAll");            
+            app.UseStaticFiles();
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.MapControllers();
 
             app.Run();

@@ -45,6 +45,10 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             await _dbSet.AddAsync(entity);
             return entity;
         }
+        public async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            await _context.Set<T>().AddRangeAsync(entities);
+        }
 
         public void Update(T entity)
         {

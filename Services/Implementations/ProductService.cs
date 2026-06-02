@@ -11,17 +11,19 @@ namespace Furniture_E_Commerce.Services.Implementations
     {
         private readonly IProductRepository _productRepo;
         private readonly IDiscountRepository _discountRepo;
-
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IProductImageRepository _imageRepo; // ← ADD THIS
 
         public ProductService(
             IProductRepository productRepo,
             IDiscountRepository discountRepo,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IProductImageRepository imageRepo) // ← ADD THIS
         {
             _productRepo = productRepo;
             _discountRepo = discountRepo;
             _httpContextAccessor = httpContextAccessor;
+            _imageRepo = imageRepo; // ← ADD THIS
         }
 
         public async Task<(IEnumerable<ProductCardDto> Items, int TotalCount)>
@@ -55,18 +57,20 @@ namespace Furniture_E_Commerce.Services.Implementations
         public async Task<ProductDetailsDto> CreateProductAsync(CreateProductDto dto)
         {
             var product = dto.Adapt<Product>();
-
+        
+            product.Images.Clear(); // ← NUCLEAR FIX
+        
             await ApplyDiscountAsync(product);
-
+        
             product.Slug = dto.Name.ToLower().Trim().Replace(" ", "-").Replace("'", "")
                 + "-" + Guid.NewGuid().ToString("N")[..6];
-
+        
             await _productRepo.AddAsync(product);
             await _productRepo.SaveChangesAsync();
-
+        
             if (dto.Images != null && dto.Images.Count > 0)
                 await SaveImagesAsync(product.Id, dto.Images, startOrder: 0);
-
+        
             var created = await _productRepo.GetWithDetailsAsync(product.Id);
             return created!.Adapt<ProductDetailsDto>();
         }
@@ -76,10 +80,13 @@ namespace Furniture_E_Commerce.Services.Implementations
             var product = await _productRepo.GetWithDetailsAsync(productId);
             if (product == null) throw new Exception("Product not found");
 
+            var existingImages = product.Images.ToList(); // ← save before adapt
+
             dto.Adapt(product);
 
-            await ApplyDiscountAsync(product);
+            product.Images = existingImages; // ← restore after adapt
 
+            await ApplyDiscountAsync(product);
             product.UpdatedAt = DateTime.UtcNow;
 
             if (dto.Images != null && dto.Images.Count > 0)
@@ -137,13 +144,9 @@ namespace Furniture_E_Commerce.Services.Implementations
 
             var folderPath = Path.Combine(
                 Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "images",
-                "products");
+                "wwwroot", "images", "products");
 
             Directory.CreateDirectory(folderPath);
-
-            var request = _httpContextAccessor.HttpContext?.Request;
 
             foreach (var file in files)
             {
@@ -151,18 +154,15 @@ namespace Furniture_E_Commerce.Services.Implementations
                     continue;
 
                 var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-
                 var ext = Path.GetExtension(file.FileName).ToLower();
 
                 if (!allowed.Contains(ext))
                     throw new Exception("Invalid image format");
 
-                var fileName = $"{Guid.NewGuid()}{ext}";
-
+                var fileName = $"{Guid.NewGuid():N}{ext}";
                 var fullPath = Path.Combine(folderPath, fileName);
 
                 using var stream = new FileStream(fullPath, FileMode.Create);
-
                 await file.CopyToAsync(stream);
 
                 var imageUrl =
@@ -177,6 +177,13 @@ namespace Furniture_E_Commerce.Services.Implementations
                     IsPrimary = order == 0,
                     DisplayOrder = order++
                 });
+            }
+
+            // ← THIS WAS MISSING: actually persist the images
+            if (imageEntities.Count > 0)
+            {
+                await _imageRepo.AddRangeAsync(imageEntities);
+                await _imageRepo.SaveChangesAsync();
             }
         }
     }

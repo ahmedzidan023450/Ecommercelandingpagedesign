@@ -8,5 +8,7 @@
         public int StockQuantity { get; set; }
         public int CategoryId { get; set; }
         public int? DiscountId { get; set; }
-        public IList<IFormFile> Images { get; set; } = new List<IFormFile>();    }
+        public IList<IFormFile> Images { get; set; } = new List<IFormFile>();
+        
+    }
 }

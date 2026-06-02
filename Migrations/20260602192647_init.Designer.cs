@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Furniture_E_Commerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260602173159_Init")]
-    partial class Init
+    [Migration("20260602192647_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
