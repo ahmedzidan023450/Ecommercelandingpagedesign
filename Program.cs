@@ -73,7 +73,10 @@ namespace Furniture_E_Commerce
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                            Encoding.UTF8.GetBytes(
+                                builder.Configuration["Jwt:Key"]
+                                ?? throw new Exception("JWT Key Missing")
+                                ))
                     };
                 });
 
