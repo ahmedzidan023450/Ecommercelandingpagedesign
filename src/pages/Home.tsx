@@ -1,214 +1,177 @@
-import React, { useState } from "react";
-import { Wrench, ShieldCheck, Truck, MessageCircle, ChevronLeft } from "lucide-react" ;
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ShieldCheck, Truck, ChevronLeft, Wrench, RefreshCw } from 'lucide-react';
 
 export default function Home() {
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5150/api";
+  
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // -- إعدادات الـ Pagination --
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true); // عشان نعرف في منتجات تانية ولا خلصت
 
-  // قراءة الإعدادات والوقوف على قيم كودك الأصلي كـ الافتراضي
-  const [settings] = useState(() => {
-    const saved = localStorage.getItem('homeSettings');
-    return saved ? JSON.parse(saved) : {
-      heroTitle: "غرف نوم وطني من المصنع مباشرة",
-      heroSubtitle: "توصيل مجاني في الرياض | الدفع عند الاستلام | ضمان مصنعي على جميع منتجاتنا.",
-      heroImage: "https://images.unsplash.com/photo-1640109478916-f445f8f19b11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBtb2Rlcm4lMjBiZWRyb29tJTIwaW50ZXJpb3J8ZW58MXx8fHwxNzc3ODk5NTMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      featuredCount: 6,
-      showFeatures: true
-    };
-  });
+  // سحب إعدادات البانر من اللوكل ستوريدج (اللي الأدمن بيعدلها)
+  const savedSettings = localStorage.getItem('homeSettings');
+  const homeSettings = savedSettings ? JSON.parse(savedSettings) : {
+    heroTitle: "غرف نوم وطني من المصنع مباشرة",
+    heroSubtitle: "توصيل مجاني في الرياض | الدفع عند الاستلام | ضمان مصنعي على جميع منتجاتنا.",
+    heroImage: "https://images.unsplash.com/photo-1640109478916-f445f8f19b11?q=80"
+  };
 
-  // مصفوفة المنتجات الستة الأصلية بتاعتك بالمللي مضاف إليها فلتر الـ 'home'
-  const [products] = useState(() => {
-    const saved = localStorage.getItem('products');
-    if (saved) {
-      // هنا بيعرض فقط المنتجات اللي الأدمن اختار يعرضها في الرئيسية
-      return JSON.parse(saved).filter((p: any) => p.category === 'home' || !p.category);
-    }
-    return [
-      {
-        id: 1,
-        title: "غرفة نوم عصرية متكاملة",
-        price: "4,500 ر.س",
-        category: "home",
-        image: "https://images.unsplash.com/photo-1762606368623-81bb2d5f5778?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBiZWRyb29tJTIwZnVybml0dXJlJTIwc2V0fGVufDF8fHx8MTc3ODAwMjM4OHww&ixlib=rb-4.1.0&q=80&w=1080",
-      },
-      {
-        id: 2,
-        title: "سرير خشبي بتصميم مبسط",
-        price: "2,200 ر.س",
-        category: "home",
-        image: "https://images.unsplash.com/photo-1768253843445-49fa5f4a801f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwd29vZGVuJTIwYmVkfGVufDF8fHx8MTc3ODAwMjM4OHww&ixlib=rb-4.1.0&q=80&w=1080",
-      },
-      {
-        id: 3,
-        title: "غرفة نوم رئيسية فاخرة",
-        price: "6,800 ر.س",
-        category: "home",
-        image: "https://images.unsplash.com/photo-1772563214602-3c6434766700?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVnYW50JTIwbWFzdGVyJTIwYmVkcm9vbSUyMGJlZHxlbnwxfHx8fDE3NzgwMDIzODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      },
-      {
-        id: 4,
-        title: "طقم غرفة نوم أطفال",
-        category: "home",
-        price: "3,100 ر.س",
-        image: "https://images.unsplash.com/photo-1769690398773-7bd5122ab719?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxraWRzJTIwYmVkcm9vbSUyMGZ1cm5pdHVyZXxlbnwxfHx8fDE3NzgwMDIzODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      },
-      {
-        id: 5,
-        title: "دولاب ملابس حديث",
-        category: "home",
-        price: "1,850 ر.س",
-        image: "https://images.unsplash.com/photo-1769690398694-9c5d5ca4b4ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMG1vZGVybiUyMHdhcmRyb2JlJTIwYmVkcm9vbXxlbnwxfHx8fDE3NzgwMDIzODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      },
-      {
-        id: 6,
-        title: "طقم سرير كلاسيكي فخم",
-        category: "home",
-        price: "7,500 ر.س",
-        image: "https://images.unsplash.com/photo-1712172424737-fb0e5bb99e18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbGFzc2ljJTIwbHV4dXJ5JTIwYmVkJTIwc2V0fGVufDF8fHx8MTc3ODAwMjM4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (page === 1) setLoading(true);
+      else setLoadingMore(true);
+
+      try {
+        const res = await fetch(`${apiUrl}/products?page=${page}&pageSize=6`);
+        const data = await res.json();
+        
+        const fetchedProducts = data.items || data.data || data || [];
+
+        // لو دي أول صفحة، حط المنتجات.. لو صفحة تانية، ادمجهم مع القديم
+        if (page === 1) {
+          setProducts(fetchedProducts);
+        } else {
+          setProducts(prev => [...prev, ...fetchedProducts]);
+        }
+
+        // لو المنتجات اللي راجعة أقل من 6، أو الباك إند بعت إن دي آخر صفحة، نوقف الزرار
+        if (fetchedProducts.length < 6 || (data.totalPages && page >= data.totalPages)) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-    ];
-  });
+    };
+
+    fetchProducts();
+  }, [apiUrl, page]); // كل ما الـ page تتغير، الـ useEffect هيشتغل يجيب الجديد
 
   return (
-    <>
-      {/* Hero Section */}
-      <section className="relative h-[80vh] min-h-[500px] flex items-center">
-        {/* Background Image */}
+    <div className="bg-gray-50 min-h-screen" dir="rtl">
+      
+      {/* 1. قسم البانر الرئيسي (Hero Section) */}
+      <section className="relative h-[85vh] bg-blue-950 flex items-center">
         <div className="absolute inset-0 z-0">
-          <img 
-            src={settings.heroImage}
-            alt="Luxury Bedroom"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-blue-950/80 to-blue-950/40" />
+          <img src={homeSettings.heroImage} alt="Furniture" className="w-full h-full object-cover opacity-40" />
         </div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-2xl text-white">
-            <span className="inline-block py-1 px-3 rounded-full bg-amber-500/20 text-amber-400 font-medium text-sm mb-4 border border-amber-500/30">
-              أثاث فاخر بجودة عالية
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
-              {settings.heroTitle} <br/>
-              <span className="text-amber-500">مع تركيب مجاني</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-200 mb-8 max-w-lg leading-relaxed">
-              {settings.heroSubtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a 
-                href="#products" 
-                className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg font-bold text-lg text-center transition-all shadow-lg shadow-amber-600/30"
-              >
-                تصفح التشكيلة
-              </a>
-              <a 
-                href="https://wa.me/966539404559?text=مرحباً مؤسسة رؤية، أريد الاستفسار عن منتجاتكم" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-8 py-4 rounded-lg font-bold text-lg text-center transition-all flex items-center justify-center gap-2"
-              >
-                <MessageCircle size={20} />
-                <span>تواصل معنا</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      {settings.showFeatures && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x-reverse md:divide-x divide-gray-100">
-              <div className="p-6 flex flex-col items-center">
-                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 text-blue-950">
-                  <ShieldCheck size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-blue-950 mb-2">خشب تايلندي عالي الجودة</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">نستخدم أفضل أنواع الخشب المقاوم للرطوبة والخدش لضمان استدامة الأثاث لسنوات طويلة.</p>
-              </div>
-              
-              <div className="p-6 flex flex-col items-center">
-                <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 text-amber-600">
-                  <Wrench size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-blue-950 mb-2">تصاميم مخصصة</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">نقدم خدمة التفصيل حسب الطلب والمقاسات التي تناسب مساحتك بكل دقة واحترافية.</p>
-              </div>
-
-              <div className="p-6 flex flex-col items-center">
-                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-600">
-                  <Truck size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-blue-950 mb-2">توصيل وتركيب مجاني</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">خدمة التوصيل والتركيب مجانية بالكامل داخل مدينة الرياض بأيدي فنيين متخصصين.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Products Grid */}
-      <section id="products" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-blue-950 mb-4">تشكيلتنا المميزة</h2>
-            <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full mb-4"></div>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              اختر من بين مجموعتنا الواسعة من غرف النوم العصرية والكلاسيكية التي تناسب ذوقك وتلبي احتياجاتك.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.slice(0, settings.featuredCount).map((product: any) => (
-              <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group border border-gray-100">
-                <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-950 font-bold px-3 py-1.5 rounded-lg text-sm">
-                    {product.price}
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-slate-800 mb-4 line-clamp-1">{product.title}</h3>
-                  
-                  <div className="flex items-center gap-3 text-sm text-gray-500 mb-6">
-                    <span className="flex items-center gap-1"><ShieldCheck size={16} className="text-amber-500"/>ضمان مصنعي علي كل منتجاتنا</span>
-                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                    <span className="flex items-center gap-1"><Wrench size={16} className="text-amber-500"/> تركيب مجاني</span>
-                  </div>
-
-                  <Link 
-                    to={`/product/${product.id}`}
-                    className="w-full bg-blue-950 hover:bg-blue-900 text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2 font-bold transition-colors shadow-md shadow-blue-950/20"
-                  >
-                    <span>عرض التفاصيل</span>
-                    <ChevronLeft size={20} />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-16 text-center">
-            <a 
-              href="https://wa.me/966539404559?text=مرحباً، أبحث عن تصميم مخصص لغرفة نوم" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-950 font-bold hover:text-amber-600 transition-colors text-lg group"
-            >
-              <span>هل تبحث عن تصميم مخصص؟ تواصل معنا</span>
-              <ChevronLeft className="group-hover:-translate-x-1 transition-transform" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+            {homeSettings.heroTitle}
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto">
+            {homeSettings.heroSubtitle}
+          </p>
+          <div className="flex justify-center gap-4">
+            <a href="#latest-products" className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-xl transition-colors shadow-lg shadow-amber-500/30">
+              تسوق الآن
             </a>
           </div>
         </div>
       </section>
-    </>
+
+      {/* 2. مميزات المعرض (Features) */}
+      <section className="py-12 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl">
+              <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center flex-shrink-0"><ShieldCheck size={28} /></div>
+              <div><h3 className="font-bold text-blue-950 text-lg">ضمان مصنعي</h3><p className="text-gray-500 text-sm">جودة مضمونة وتدوم طويلاً</p></div>
+            </div>
+            <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl">
+              <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center flex-shrink-0"><Truck size={28} /></div>
+              <div><h3 className="font-bold text-blue-950 text-lg">توصيل مجاني</h3><p className="text-gray-500 text-sm">داخل مدينة الرياض</p></div>
+            </div>
+            <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl">
+              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0"><Wrench size={28} /></div>
+              <div><h3 className="font-bold text-blue-950 text-lg">تركيب مجاني</h3><p className="text-gray-500 text-sm">بواسطة فريقنا المتخصص</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. قسم أحدث المنتجات */}
+      <section id="latest-products" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-blue-950 mb-2">تشكيلاتنا المميزة</h2>
+            <p className="text-gray-500">اكتشف أحدث غرف النوم والكنب المضافة مؤخراً</p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="text-center font-bold text-blue-950 py-12 text-xl">جاري تحميل المنتجات... ⏳</div>
+        ) : products.length === 0 ? (
+          <div className="text-center bg-white p-12 rounded-3xl border border-gray-100 text-gray-500 font-medium">
+            لا توجد منتجات حالياً، سيتم إضافة المنتجات قريباً!
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {products.map((product) => (
+                <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group border border-gray-100">
+                  <div className="relative h-64 overflow-hidden">
+                    <img 
+  // 1. هنا بنجرب كل الحقول اللي ممكن يكون فيها رابط
+  src={
+    product.images?.[0]?.url || 
+    product.imageUrl || 
+    product.image || 
+    "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=800&q=80"
+  } 
+  alt={product.name || product.title} 
+  className="w-full h-full object-cover"
+  // 2. الحركة دي هتخلي الكود يغير الرابط المكسور بصورة افتراضية فوراً لو فشل التحميل
+  onError={(e: any) => {
+    e.target.onerror = null; // نوقف الـ loop عشان ميفضلش يحاول
+    e.target.src = "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=800&q=80";
+  }}
+/>
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-950 font-bold px-3 py-1.5 rounded-lg text-sm shadow-sm">
+                      {product.price} ر.س
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-slate-800 mb-4 line-clamp-1">{product.name || product.title}</h3>
+                    <Link 
+                      to={`/product/${product.id}`}
+                      className="w-full bg-blue-950 hover:bg-blue-900 text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2 font-bold transition-colors shadow-md shadow-blue-950/20"
+                    >
+                      <span>عرض التفاصيل</span>
+                      <ChevronLeft size={20} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* زرار عرض المزيد (Pagination) */}
+            {hasMore && (
+              <div className="text-center mt-8">
+                <button 
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={loadingMore}
+                  className="bg-white border-2 border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white font-bold py-3 px-8 rounded-xl transition-colors flex items-center gap-2 mx-auto disabled:opacity-50"
+                >
+                  {loadingMore ? 'جاري التحميل...' : 'عرض المزيد من المنتجات'}
+                  {!loadingMore && <RefreshCw size={18} />}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+    </div>
   );
 }
