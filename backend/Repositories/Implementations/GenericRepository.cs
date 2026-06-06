@@ -2,10 +2,12 @@
 using Furniture_E_Commerce.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Furniture_E_Commerce.Models;
 
 namespace Furniture_E_Commerce.Repositories.Implementations
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T>
+        where T : class
     {
         protected readonly ApplicationDbContext _context;
         protected readonly DbSet<T> _dbSet;
@@ -13,27 +15,25 @@ namespace Furniture_E_Commerce.Repositories.Implementations
         public GenericRepository(ApplicationDbContext context)
         {
             _context = context;
-            _dbSet = _context.Set<T>();
+            _dbSet = context.Set<T>();
         }
 
-        public IQueryable<T> Query() => _context.Set<T>();
+        public IQueryable<T> Query()
+            => _dbSet.AsQueryable();
 
         public async Task<T?> GetByIdAsync(object id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
+            => await _dbSet.FindAsync(id);
 
-        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
-        {
-            return await _dbSet.FirstOrDefaultAsync(predicate);
-        }
+        public async Task<T?> FirstOrDefaultAsync(
+            Expression<Func<T, bool>> predicate)
+            => await _dbSet.FirstOrDefaultAsync(predicate);
 
-        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
-        {
-            return await _dbSet.AnyAsync(predicate);
-        }
+        public async Task<bool> ExistsAsync(
+            Expression<Func<T, bool>> predicate)
+            => await _dbSet.AnyAsync(predicate);
 
-        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+        public async Task<int> CountAsync(
+            Expression<Func<T, bool>>? predicate = null)
         {
             return predicate == null
                 ? await _dbSet.CountAsync()
@@ -45,9 +45,10 @@ namespace Furniture_E_Commerce.Repositories.Implementations
             await _dbSet.AddAsync(entity);
             return entity;
         }
+
         public async Task AddRangeAsync(IEnumerable<T> entities)
         {
-            await _context.Set<T>().AddRangeAsync(entities);
+            await _dbSet.AddRangeAsync(entities);
         }
 
         public void Update(T entity)
@@ -57,6 +58,15 @@ namespace Furniture_E_Commerce.Repositories.Implementations
 
         public void Delete(T entity)
         {
+            if (entity is ISoftDelete softDelete)
+            {
+                softDelete.IsDeleted = true;
+                softDelete.DeletedAt = DateTime.UtcNow;
+
+                _dbSet.Update(entity);
+                return;
+            }
+
             _dbSet.Remove(entity);
         }
 

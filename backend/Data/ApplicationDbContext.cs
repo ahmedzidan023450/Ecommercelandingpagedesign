@@ -1,5 +1,6 @@
 using Furniture_E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Furniture_E_Commerce.Data
 {
@@ -27,6 +28,31 @@ namespace Furniture_E_Commerce.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                  if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+                  {
+                        var parameter =
+                              Expression.Parameter(entityType.ClrType, "e");
+
+                        var property =
+                              Expression.Property(
+                                    parameter,
+                                    nameof(ISoftDelete.IsDeleted));
+
+                        var compare =
+                              Expression.Equal(
+                                    property,
+                                    Expression.Constant(false));
+
+                        var lambda =
+                              Expression.Lambda(compare, parameter);
+
+                        modelBuilder.Entity(entityType.ClrType)
+                              .HasQueryFilter((LambdaExpression)lambda);
+                  }
+            }
 
             // ========================= CATEGORY =========================
             modelBuilder.Entity<Category>(entity =>
@@ -68,7 +94,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(p => p.Category)
                       .WithMany(c => c.Products)
                       .HasForeignKey(p => p.CategoryId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(p => p.Discount)
                       .WithMany(d => d.Products)
@@ -89,7 +115,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(pi => pi.Product)
                       .WithMany(p => p.Images)
                       .HasForeignKey(pi => pi.ProductId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ========================= USER =========================
@@ -132,7 +158,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(o => o.User)
                       .WithMany(u => u.Orders)
                       .HasForeignKey(o => o.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ========================= ORDER ITEM =========================
@@ -152,7 +178,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(oi => oi.Order)
                       .WithMany(o => o.Items)
                       .HasForeignKey(oi => oi.OrderId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(oi => oi.Product)
                       .WithMany(p => p.OrderItems)
@@ -170,7 +196,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(c => c.User)
                       .WithOne(u => u.Cart)
                       .HasForeignKey<Cart>(c => c.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ========================= CART ITEM =========================
@@ -186,7 +212,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(ci => ci.Cart)
                       .WithMany(c => c.Items)
                       .HasForeignKey(ci => ci.CartId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(ci => ci.Product)
                       .WithMany(p => p.CartItems)
@@ -212,12 +238,12 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(r => r.Product)
                       .WithMany(p => p.Reviews)
                       .HasForeignKey(r => r.ProductId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(r => r.User)
                       .WithMany(u => u.Reviews)
                       .HasForeignKey(r => r.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ========================= DISCOUNT =========================
@@ -273,7 +299,7 @@ namespace Furniture_E_Commerce.Data
                 entity.HasOne(p => p.Order)
                       .WithOne(o => o.Payment)
                       .HasForeignKey<Payment>(p => p.OrderId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

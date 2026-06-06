@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models;
 
 [Table("Payments")]
-public class Payment
+public class Payment : ISoftDelete
 {
     [Key]
     public int Id { get; set; }
@@ -37,6 +37,10 @@ public class Payment
     public DateTime? PaidAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     [Required]
     public int OrderId { get; set; }

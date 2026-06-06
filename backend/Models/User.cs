@@ -6,7 +6,7 @@ using Furniture_E_Commerce.Models.Enums;
 namespace Furniture_E_Commerce.Models;
 
 [Table("Users")]
-public class User
+public class User : ISoftDelete
 {
     [Key]
     public int Id { get; set; }
@@ -39,6 +39,10 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     // ── Navigation properties ──────────────────────────────────────────────
     public virtual Cart? Cart { get; set; }

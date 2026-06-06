@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models;
 
 [Table("Categories")]
-public class Category
+public class Category : ISoftDelete
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -29,6 +29,10 @@ public class Category
     public string? ImageUrl { get; set; }
 
     public bool IsActive { get; set; } = true;
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

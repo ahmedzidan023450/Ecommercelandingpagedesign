@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models;
 
 [Table("FinancialRecords")]
-public class FinancialRecord
+public class FinancialRecord : ISoftDelete
 {
     [Key]
     public int Id { get; set; } 
@@ -39,6 +39,10 @@ public class FinancialRecord
     [Required]
     [Range(2000, 2100)]
     public int Year { get; set; }
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     public DateTime RecordedAt { get; set; } = DateTime.UtcNow;
 

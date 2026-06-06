@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models;
 
 [Table("Discounts")]
-public class Discount
+public class Discount : ISoftDelete
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -31,6 +31,10 @@ public class Discount
 
     [Required]
     public DateTime EndDate { get; set; }
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     public bool IsActive { get; set; } = true;
 

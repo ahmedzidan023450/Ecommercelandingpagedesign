@@ -5,7 +5,7 @@ namespace Furniture_E_Commerce.Models
 {
 
     [Table("OrderItems")]
-    public class OrderItem
+    public class OrderItem : ISoftDelete
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -33,6 +33,10 @@ namespace Furniture_E_Commerce.Models
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
+        
+        public bool IsDeleted { get; set; } = false;
+    
+        public DateTime? DeletedAt { get; set; }
 
         // ── Foreign keys ───────────────────────────────────────────────────────
         [Required]

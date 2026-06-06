@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models;
 
 [Table("ProductImages")]
-public class ProductImage
+public class ProductImage : ISoftDelete
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -30,6 +30,10 @@ public class ProductImage
     public int DisplayOrder { get; set; } = 0;
 
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     // ── Foreign key ────────────────────────────────────────────────────────
     [Required]

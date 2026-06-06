@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models
 {
     [Table("CartItems")]
-    public class CartItem
+    public class CartItem : ISoftDelete
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -15,6 +15,10 @@ namespace Furniture_E_Commerce.Models
         public int Quantity { get; set; }
 
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+        
+        public bool IsDeleted { get; set; } = false;
+    
+        public DateTime? DeletedAt { get; set; }
 
         // ── Foreign keys ───────────────────────────────────────────────────────
         [Required]

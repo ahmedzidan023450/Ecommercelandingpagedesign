@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Furniture_E_Commerce.Models;
 
 [Table("RefreshTokens")]
-public class RefreshToken
+public class RefreshToken : ISoftDelete
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -36,6 +36,10 @@ public class RefreshToken
     /// </summary>
     [MaxLength(45)]
     public string? CreatedByIp { get; set; }
+    
+    public bool IsDeleted { get; set; } = false;
+    
+    public DateTime? DeletedAt { get; set; }
 
     // ── Foreign key ────────────────────────────────────────────────────────
     [Required]
