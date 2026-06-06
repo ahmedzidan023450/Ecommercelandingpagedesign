@@ -61,6 +61,7 @@ export default function ProductsList() {
         mutationFn: async (id: number) => await apiClient.delete(`/api/admin/products/${id}`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] }); // تحديث الإحصائيات
             toast.success('تم الحذف بنجاح');
             setProductToDelete(null);
         },

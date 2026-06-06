@@ -20,7 +20,7 @@ export default function Login() {
       const res = await apiClient.post('/api/auth/login', credentials);
       return res.data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       // حفظ البيانات والتوكن في الـ Context
       login(data.data, data.data.accessToken);
       toast.success('تم تسجيل الدخول بنجاح! 👋');

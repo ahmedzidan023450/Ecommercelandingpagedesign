@@ -29,6 +29,7 @@ export default function AddProductForm({ setView }: { setView: (v: ViewType) => 
             setImageFile(null);
             setView('list');
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
         }
     });
 

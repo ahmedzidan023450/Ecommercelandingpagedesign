@@ -9,7 +9,7 @@ export default function Home() {
   const homeSettings = {
     heroTitle: "غرف نوم وطني من المصنع مباشرة",
     heroSubtitle: "توصيل مجاني في الرياض | الدفع عند الاستلام | ضمان مصنعي على جميع منتجاتنا.",
-    heroImage: "https://images.unsplash.com/photo-1640109478916-f445f8f19b11?q=80"
+    heroImage: "/bj.jpeg",
   };
 
   // استخدام useInfiniteQuery السحرية للـ Pagination

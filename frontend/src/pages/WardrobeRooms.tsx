@@ -33,7 +33,7 @@ export default function WardrobeRooms() {
     );
 
     if (wardrobeCategories.length === 0) return [];
-    
+
     const categoryIds = wardrobeCategories.map((c: any) => Number(c.id));
 
     // فلترة المنتجات بناءً على رقم القسم
@@ -51,7 +51,7 @@ export default function WardrobeRooms() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-blue-950 mb-4">غرف سحاب</h1>
-          <p className="text-gray-600 text-lg">أحدث تشكيلات غرف النوم ذات الدخال السحاب والعملية.</p>
+
         </div>
 
         {isLoading ? (
