@@ -1,0 +1,41 @@
+using Furniture_E_Commerce.Data;
+using Furniture_E_Commerce.Models;
+using Furniture_E_Commerce.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace Furniture_E_Commerce.Repositories.Implementations
+{
+    public class CartRepository : GenericRepository<Cart>, ICartRepository
+    {
+        public CartRepository(ApplicationDbContext context)
+            : base(context)
+        {
+        }
+
+        public async Task<Cart?> GetByUserIdAsync(int userId)
+        {
+            return await _context.Carts
+                .Include(c => c.Items)
+                    .ThenInclude(ci => ci.Product)
+                        .ThenInclude(p => p.Images)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+        }
+
+       public async Task<CartItem?> GetCartItemAsync(int cartId, int productId)
+        {
+            return await _context.CartItems
+                .FirstOrDefaultAsync(ci =>
+                    ci.CartId == cartId &&
+                    ci.ProductId == productId);
+        }
+        public async Task ClearCartAsync(int userId)
+        {
+            var cart = await GetByUserIdAsync(userId);
+            if (cart != null)
+            {
+                _context.CartItems.RemoveRange(cart.Items);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}
